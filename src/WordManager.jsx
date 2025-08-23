@@ -17,26 +17,30 @@ export default function WordManager() {
   const [language, setLanguage] = useState("TH");
   const [difficulty, setDifficulty] = useState(1);
 
-  // โหลดข้อมูลจาก Firestore
+  const [enemies, setEnemies] = useState([]);
+
+  // โหลด words
   const loadWords = async () => {
     const snapshot = await getDocs(collection(db, "words"));
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setWords(data);
+    setWords(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+  };
+
+  // โหลด enemies
+  const loadEnemies = async () => {
+    const snapshot = await getDocs(collection(db, "enemies"));
+    setEnemies(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
   };
 
   useEffect(() => {
     loadWords();
+    loadEnemies();
   }, []);
 
-  // เพิ่มคำใหม่ (กันซ้ำด้วย)
+  // เพิ่มคำ
   const addWord = async () => {
     if (!newWord.trim() || !meaning.trim())
       return alert("กรุณากรอกข้อมูลให้ครบ");
 
-    // เช็คซ้ำ
     const q = query(
       collection(db, "words"),
       where("word", "==", newWord),
@@ -62,36 +66,21 @@ export default function WordManager() {
     await loadWords();
   };
 
-  // ลบคำเดียว
+  // ลบคำ
   const deleteWord = async (id) => {
     await deleteDoc(doc(db, "words", id));
     await loadWords();
   };
 
-  // ลบทุกคำศัพท์
-  const clearAllWords = async () => {
-    if (!window.confirm("⚠️ ต้องการลบทุกคำศัพท์ในฐานข้อมูลหรือไม่?")) return;
-
-    const snapshot = await getDocs(collection(db, "words"));
-    const batchDelete = snapshot.docs.map((d) =>
-      deleteDoc(doc(db, "words", d.id))
-    );
-
-    await Promise.all(batchDelete);
-    alert("✅ ลบคำศัพท์ทั้งหมดเรียบร้อยแล้ว");
-    await loadWords();
-  };
-
-  // Import JSON
-  const handleImport = async (event) => {
+  // Import words.json
+  const handleImportWords = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
       const text = await file.text();
       const jsonWords = JSON.parse(text);
-      let added = 0,
-        skipped = 0;
+      let added = 0, skipped = 0;
 
       for (const word of jsonWords) {
         const q = query(
@@ -104,84 +93,68 @@ export default function WordManager() {
         if (snapshot.empty) {
           await addDoc(collection(db, "words"), word);
           added++;
-        } else {
-          skipped++;
-        }
+        } else skipped++;
       }
 
       alert(`✅ Import เสร็จแล้ว (เพิ่มใหม่: ${added} | ข้ามซ้ำ: ${skipped})`);
       await loadWords();
     } catch (err) {
-      console.error("Import error:", err);
-      alert("❌ เกิดข้อผิดพลาดตอน import");
+      console.error("Import words error:", err);
+    }
+  };
+
+  // Import enemy.json
+  const handleImportEnemies = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const jsonEnemies = JSON.parse(text);
+      let added = 0, skipped = 0;
+
+      for (const enemy of jsonEnemies) {
+        const q = query(
+          collection(db, "enemies"),
+          where("name", "==", enemy.name)
+        );
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          await addDoc(collection(db, "enemies"), enemy);
+          added++;
+        } else skipped++;
+      }
+
+      alert(`✅ Import Enemy เสร็จแล้ว (เพิ่มใหม่: ${added} | ข้ามซ้ำ: ${skipped})`);
+      await loadEnemies();
+    } catch (err) {
+      console.error("Import enemies error:", err);
     }
   };
 
   return (
     <div className="p-6 bg-white">
-      <h1 className="text-xl font-bold mb-4">Word Manager</h1>
+      <h1 className="text-xl font-bold mb-4">Word & Enemy Manager</h1>
 
-      {/* ฟอร์มเพิ่มคำใหม่ + ปุ่ม import/clear */}
-      <div className="mb-6 space-y-2 flex flex-wrap gap-2">
-        <input
-          type="text"
-          placeholder="Word"
-          value={newWord}
-          onChange={(e) => setNewWord(e.target.value)}
-          className="border px-3 py-1"
-        />
-        <input
-          type="text"
-          placeholder="Meaning"
-          value={meaning}
-          onChange={(e) => setMeaning(e.target.value)}
-          className="border px-3 py-1"
-        />
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="border px-3 py-1"
-        >
-          <option value="TH">ไทย</option>
-          <option value="EN">English</option>
-        </select>
-        <input
-          type="number"
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="border px-3 py-1 w-20"
-          min="1"
-          max="5"
-        />
-        <button
-          onClick={addWord}
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          เพิ่มคำ
-        </button>
-
-        {/* ปุ่ม Import JSON */}
+      {/* Import buttons */}
+      <div className="flex gap-2 mb-4">
+        {/* Words */}
         <label className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer">
-          📂 Import JSON
-          <input
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={handleImport}
-          />
+          📂 Import Words JSON
+          <input type="file" accept=".json" className="hidden" onChange={handleImportWords} />
         </label>
 
-        {/* ปุ่ม Clear All */}
-        <button
-          onClick={clearAllWords}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          🗑️ เคลียร์ทุกคำศัพท์
-        </button>
+        {/* Enemies */}
+        <label className="px-4 py-2 bg-purple-500 text-white rounded cursor-pointer">
+          🐉 Import Enemies JSON
+          <input type="file" accept=".json" className="hidden" onChange={handleImportEnemies} />
+        </label>
       </div>
 
-      {/* ตารางแสดงคำทั้งหมด */}
-      <table className="border-collapse border w-full">
+      {/* ตาราง Words */}
+      <h2 className="text-lg font-bold mt-6">📖 Words</h2>
+      <table className="border-collapse border w-full mb-6">
         <thead>
           <tr className="bg-gray-200">
             <th className="border px-3 py-2">Word</th>
@@ -206,6 +179,29 @@ export default function WordManager() {
                   ลบ
                 </button>
               </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* ตาราง Enemies */}
+      <h2 className="text-lg font-bold mt-6">👾 Enemies</h2>
+      <table className="border-collapse border w-full">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border px-3 py-2">Name</th>
+            <th className="border px-3 py-2">Image</th>
+            <th className="border px-3 py-2">Health</th>
+            <th className="border px-3 py-2">Difficulty</th>
+          </tr>
+        </thead>
+        <tbody>
+          {enemies.map((e) => (
+            <tr key={e.id}>
+              <td className="border px-3 py-2">{e.name}</td>
+              <td className="border px-3 py-2"><img src={e.image} alt={e.name} className="w-16 h-16 object-contain" /></td>
+              <td className="border px-3 py-2">{e.health}</td>
+              <td className="border px-3 py-2">{e.difficulty}</td>
             </tr>
           ))}
         </tbody>
