@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+body {
+  font-family: "Noto Sans Thai", sans-serif;
+  font-optical-sizing: auto;
+  margin: 0;
+  padding: 0;
+  background-image: url('assets/type-rpg-background.png');
+  background-repeat: no-repeat;
+  background-size: cover;     /* ให้ภาพเต็มพื้นที่ container */
+  background-position: center; /* จัดภาพให้อยู่กลาง */
+  width: 100vw;   /* เต็มความกว้าง viewport */
+  height: 100vh;  /* เต็มความสูง viewport */
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.game-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.battlefield {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.Textbox {
+  width: 20vw;
+  height: 10vw;
+  border-radius: 10%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 40px;
+}
+
+.typing-box input {
+  padding: 10px;
+  font-size: 18px;
+}
+
+.game-info-bar {
+  margin-top: 20px;
+  font-size: 26px;
+  color: white;
+  background: #00000077;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+.background {
+  margin: 10px auto;
+  padding: 10px;
+  width: fit-content;
+
+}
+
+.letter {
+  font-size: 24px;
+  margin: 0 2px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background-color: white;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+.enemy-word{
+  font-family: "K2D", sans-serif;
+  font-size: 24px;
+  color:black;
+}
+.correct {
+  background-color: #90ee90;
+}
+
+.incorrect {
+  background-color: #ff7f7f;
+}
+.logo {
+  display: flex;
+  flex-direction: column;
+  object-fit: cover;
+  width: 20vw;
+  height: 10vw;
+}
+.enemy {
+  display: flex;
+  object-fit: cover;
+  width: 25vw;
+  height: 25vw;
+}
+
+.player-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  margin-bottom: 12px;
+}
+
+.player-name {
+  color: white;
+  font-weight: bold;
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
