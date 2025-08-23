@@ -70,9 +70,12 @@ export default function App() {
         setEnemies(data);
 
         if (data.length > 0) {
-          // สุ่มศัตรูตัวแรก
-          const randomEnemy = data[Math.floor(Math.random() * data.length)];
-          setCurrentEnemy(randomEnemy);
+          const enemy = data[Math.floor(Math.random() * data.length)];
+          setCurrentEnemy(enemy);
+          setEnemyMaxHealth(enemy.health);
+          setEnemyHealth(enemy.health);   // ต้องเซ็ตเลือดจริงด้วย
+          setEnemyImage(enemy.image);
+          setEnemyName(enemy.name);
         }
       };
 
@@ -80,22 +83,19 @@ export default function App() {
     }, []);
 
   // สลับศัตรูเมื่อ HP หมด
-  useEffect(() => {
-  if (enemyHealth <= 0 && enemies.length > 0) {
-    // ✅ สุ่มศัตรูใหม่จาก Firebase
-    const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-
-    // รีเซ็ตสถานะศัตรู
-    setEnemyMaxHealth(randomEnemy.health);
-    setEnemyImage(randomEnemy.image);
-    setEnemyName(randomEnemy.name);
+useEffect(() => {
+  if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
+    const newEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+    setCurrentEnemy(newEnemy);
+    setEnemyMaxHealth(newEnemy.health);
+    setEnemyHealth(newEnemy.health);  // รีเซ็ตเลือดใหม่
+    setEnemyImage(newEnemy.image);
+    setEnemyName(newEnemy.name);
     setTypedIndexes([]);
     setInputValue("");
-
-    // ตั้งค่า currentEnemy ใหม่ (ถ้าคุณใช้เก็บ)
-    setCurrentEnemy(randomEnemy);
   }
-}, [enemyMaxHealth, enemies]);
+}, [enemyHealth, enemies]);  // ✅ ใช้ enemyHealth
+
 
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
