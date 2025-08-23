@@ -11,26 +11,23 @@ import "./output.css";
 import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
-const enemyImages = [
-  "./src/assets/pic/enemies/enemy1.png",
-  "./src/assets/pic/enemies/enemy2.png",
-  "./src/assets/pic/enemies/enemy3.png",
-  "./src/assets/pic/enemies/enemy4.png",
-  "./src/assets/pic/enemies/enemy5.png",
-];
-
 export default function App() {
+  const [enemies, setEnemies] = useState([]);
+  const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
   const [typedIndexes, setTypedIndexes] = useState([]);
   const [health, setPlayerHP] = useState(100);
-  const [enemyHealth, setEnemyHealth] = useState(100);
   const [inputValue, setInputValue] = useState("");
   const [language, setLanguage] = useState("th");
   const [wordList, setWordList] = useState([]);
   const [enemyShake, setEnemyShake] = useState(false);
-  const [enemyImage, setEnemyImage] = useState(null);
+  const [enemyHealth, setEnemyHealth] = useState(null);
+  const [enemyMaxHealth, setEnemyMaxHealth] = useState(null);
+  const [enemyImage, setEnemyImage] = useState("");
+  const [enemyname, setEnemyName] = useState("");
   const playerName = "นักรบ";
-
+  const difficulty = 1 ;
+  
   // Effect states
   const [playerHit, setPlayerHit] = useState(false);
   const [damageText, setDamageText] = useState(null);
@@ -54,23 +51,52 @@ export default function App() {
       if (words.length > 0) {
         const newWord = words[Math.floor(Math.random() * words.length)];
         setEnemyWord(newWord);
-        setEnemyImage(enemyImages[Math.floor(Math.random() * enemyImages.length)]);
       }
     };
     loadWords();
   }, [language]);
 
+  useEffect(() => {
+      const loadEnemies = async () => {
+          const qe = query(
+          collection(db, "enemies"),
+          where("difficulty", "==", difficulty)
+        );
+        const snapshot = await getDocs(qe);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEnemies(data);
+
+        if (data.length > 0) {
+          // สุ่มศัตรูตัวแรก
+          const randomEnemy = data[Math.floor(Math.random() * data.length)];
+          setCurrentEnemy(randomEnemy);
+        }
+      };
+
+      loadEnemies();
+    }, []);
+
   // สลับศัตรูเมื่อ HP หมด
   useEffect(() => {
-    if (enemyHealth <= 0 && wordList.length > 0) {
-      setEnemyHealth(100);
-      const newWord = wordList[Math.floor(Math.random() * wordList.length)];
-      setEnemyWord(newWord);
-      setEnemyImage(enemyImages[Math.floor(Math.random() * enemyImages.length)]);
-      setTypedIndexes([]);
-      setInputValue("");
-    }
-  }, [enemyHealth, wordList]);
+  if (enemyHealth <= 0 && enemies.length > 0) {
+    // ✅ สุ่มศัตรูใหม่จาก Firebase
+    const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+
+    // รีเซ็ตสถานะศัตรู
+    setEnemyMaxHealth(randomEnemy.health);
+    setEnemyImage(randomEnemy.image);
+    setEnemyName(randomEnemy.name);
+    setTypedIndexes([]);
+    setInputValue("");
+
+    // ตั้งค่า currentEnemy ใหม่ (ถ้าคุณใช้เก็บ)
+    setCurrentEnemy(randomEnemy);
+  }
+}, [enemyMaxHealth, enemies]);
+
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
 
@@ -140,7 +166,7 @@ export default function App() {
       {/* Logo + Buttons */}
       <div className="flex items-center justify-between w-full mb-4">
         <img
-          src="./src/assets/pic/logo/logotrpg.png"
+          src="pic/logo/logotrpg.png"
           alt="logo"
           className="object-cover w-[20vw] h-[10vw]"
         />
@@ -164,7 +190,7 @@ export default function App() {
       {/* Enemy */}
       <div className="flex justify-center items-center my-5">
         <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-          <EnemyBox image={enemyImage} health={enemyHealth} />
+          <EnemyBox image={enemyImage} health={enemyHealth} name={enemyname} maxhealth={enemyMaxHealth}/>
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
       </div>
