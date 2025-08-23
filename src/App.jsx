@@ -5,6 +5,7 @@ import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
 import Healthbar from "./components/Healthbar";
 import { splitByLanguage } from "./utils/thaiSplit.js";
+import "./output.css";
 
 // Firebase
 import { db } from "./firebase";
