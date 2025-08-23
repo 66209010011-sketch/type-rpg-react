@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 body {
   font-family: "Noto Sans Thai", sans-serif;
   font-optical-sizing: auto;
@@ -7,110 +5,67 @@ body {
   padding: 0;
   background-image: url('assets/type-rpg-background.png');
   background-repeat: no-repeat;
-  background-size: cover;     /* ให้ภาพเต็มพื้นที่ container */
-  background-position: center; /* จัดภาพให้อยู่กลาง */
-  width: 100vw;   /* เต็มความกว้าง viewport */
-  height: 100vh;  /* เต็มความสูง viewport */
+  background-size: cover;
+  background-position: center;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
 }
-
 #root {
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-
-.game-container {
-  text-align: center;
-  padding: 20px;
+.enemy-hit {
+  filter: brightness(0.6) saturate(2) hue-rotate(-20deg);
+  transition: 0.2s;
 }
 
-.battlefield {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin: 20px 0;
-}
-
-.Textbox {
-  width: 20vw;
-  height: 10vw;
-  border-radius: 10%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 40px;
-}
-
-.typing-box input {
-  padding: 10px;
-  font-size: 18px;
-}
-
-.game-info-bar {
-  margin-top: 20px;
-  font-size: 26px;
-  color: white;
-  background: #00000077;
-  padding: 20px;
-  border: 1px solid #ccc;
-}
-
-.background {
-  margin: 10px auto;
-  padding: 10px;
-  width: fit-content;
-
-}
-
-.letter {
-  font-size: 24px;
-  margin: 0 2px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  background-color: white;
+.enemy-container {
+  position: relative;
   display: inline-block;
-  transition: background-color 0.2s ease;
 }
-.enemy-word{
-  font-family: "K2D", sans-serif;
+
+.damage-float {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 24px;
-  color:black;
-}
-.correct {
-  background-color: #90ee90;
-}
-
-.incorrect {
-  background-color: #ff7f7f;
-}
-.logo {
-  display: flex;
-  flex-direction: column;
-  object-fit: cover;
-  width: 20vw;
-  height: 10vw;
-}
-.enemy {
-  display: flex;
-  object-fit: cover;
-  width: 25vw;
-  height: 25vw;
-}
-
-.player-status-container {
-  display: flex;
-  flex-direction: column;
-  align-items: left;
-  margin-bottom: 12px;
-}
-
-.player-name {
-  color: white;
   font-weight: bold;
-  font-size: 1.3rem;
-  margin-bottom: 6px;
+  color: red;
+  animation: floatUp 0.8s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -50px); }
+}
+
+.enemy-shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5px, 0); }
+  50% { transform: translate(5px, 0); }
+  75% { transform: translate(-5px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+
+.player-hit-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 0, 0, 0.25);
+  pointer-events: none;
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
