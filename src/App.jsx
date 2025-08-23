@@ -12,11 +12,11 @@ import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 const enemyImages = [
-  "src/assets/pic/enemies/enemy1.png",
-  "src/assets/pic/enemies/enemy2.png",
-  "src/assets/pic/enemies/enemy3.png",
-  "src/assets/pic/enemies/enemy4.png",
-  "src/assets/pic/enemies/enemy5.png",
+  "./src/assets/pic/enemies/enemy1.png",
+  "./src/assets/pic/enemies/enemy2.png",
+  "./src/assets/pic/enemies/enemy3.png",
+  "./src/assets/pic/enemies/enemy4.png",
+  "./src/assets/pic/enemies/enemy5.png",
 ];
 
 export default function App() {
@@ -140,7 +140,7 @@ export default function App() {
       {/* Logo + Buttons */}
       <div className="flex items-center justify-between w-full mb-4">
         <img
-          src="src/assets/pic/logo/logotrpg.png"
+          src="./src/assets/pic/logo/logotrpg.png"
           alt="logo"
           className="object-cover w-[20vw] h-[10vw]"
         />
