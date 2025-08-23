@@ -10,7 +10,7 @@ export default function EnemyBox({ image, health, name, maxhealth}) {
             <div className="w-[12vw]">
               <Healthbar health={health} maxhealth={maxhealth} />
             </div> 
-            <p className="text-2xl font-bold font-['Bitcount'] ">{name}</p>
+            <p className="text-2xl font-bold font-['Bitcount'] ">{name},{image}</p>
           </td>
         </tr>
         <tr>
