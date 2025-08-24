@@ -120,7 +120,8 @@ useEffect(() => {
         if (status === "correct") {
           setCorrectCount((c) => c + 1);
           playSound("/sound/correct.wav");
-        } else {
+        } 
+        if (status === "incorrect") {
           playSound("/sound/incorrect.wav");
         }
       }  
