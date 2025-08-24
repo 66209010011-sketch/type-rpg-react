@@ -117,8 +117,13 @@ useEffect(() => {
       // ✅ นับจำนวนพิมพ์
       if (typedIndexes[i] !== status) {
         setTypedCount((c) => c + 1);
-        if (status === "correct") setCorrectCount((c) => c + 1);
-      }
+        if (status === "correct") {
+          setCorrectCount((c) => c + 1);
+          playSound("/sound/correct.wav");
+        } else {
+          playSound("/sound/incorrect.wav");
+        }
+      }  
     }
 
     setTypedIndexes(newStatuses);
@@ -137,12 +142,12 @@ useEffect(() => {
         setDamageText(damage);
         setTimeout(() => setDamageText(null), 800);
         setTimeout(() => setEnemyShake(false), 400);
-        playSound("/sound/correct.wav")
+        playSound("/sound/enemyhit.wav");
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
-        playSound("/sound/playerhit.wav")
+        playSound("/sound/playerhit.wav");
       }
       
       // รีเซ็ตการพิมพ์
