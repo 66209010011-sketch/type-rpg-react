@@ -204,6 +204,9 @@
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
+  .right-1 {
+    right: calc(var(--spacing) * 1);
+  }
   .right-1\/2 {
     right: calc(1/2 * 100%);
   }
@@ -260,6 +263,9 @@
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
+  }
+  .w-\[5vw\] {
+    width: 5vw;
   }
   .w-\[12vw\] {
     width: 12vw;

@@ -17,7 +17,7 @@ export default function GameInfoBar({word, health, playerName, language, startTi
       </div>
       
       <div className="mt-4 flex justify-center gap-6">
-        <div>WPM: <span className="font-bold text-3xl">{wpm}</span> Accuracy: <span className="font-bold text-3xl">{accuracy}%</span></div>
+        <div><img src="pic/wpm.png" alt=""className="w-[5vw]" /><span className="font-bold text-3xl">{wpm}</span><img src="pic/accuracy.png" alt="" className="w-[5vw]" /><span className="font-bold text-3xl">{accuracy}%</span></div>
       </div>
     </div>
   );
