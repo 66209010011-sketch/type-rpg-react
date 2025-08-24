@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Textbox from "./components/Textbox.jsx";
+import Textbox from "./components/Playerbox.jsx";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
