@@ -267,6 +267,9 @@
   .w-\[5vw\] {
     width: 5vw;
   }
+  .w-\[10vw\] {
+    width: 10vw;
+  }
   .w-\[12vw\] {
     width: 12vw;
   }
@@ -422,7 +425,7 @@
     text-align: center;
   }
   .font-\[\'Bitcount\'\] {
-    font-family: "Bitcount Prop Double", system-ui;
+    font-family: 'Bitcount';
   }
   .font-\[\'K2D\'\] {
     font-family: 'K2D';
