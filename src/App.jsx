@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import PlayerBox from "./components/PlayerBox";
+import Textbox from "./components/Textbox.jsx";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
@@ -193,6 +193,13 @@ useEffect(() => {
           <EnemyBox image={enemyImage} health={enemyHealth} name={enemyname} maxhealth={enemyMaxHealth}/>
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
+      </div>
+      <div className="flex justify-center items-end ">
+        <Textbox 
+        word={enemyWord}
+        typedIndexes={typedIndexes}
+        language={language}
+        />
       </div>
 
       {/* InfoBar */}
