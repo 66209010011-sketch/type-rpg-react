@@ -143,7 +143,7 @@ useEffect(() => {
         setDamageText(damage);
         setTimeout(() => setDamageText(null), 800);
         setTimeout(() => setEnemyShake(false), 400);
-        playSound("/sound/enemyhit.wav");
+        playSound("/sound/enemyhit.mp3");
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
         setPlayerHit(true);
@@ -185,10 +185,10 @@ useEffect(() => {
 
         <div className="flex gap-2">
           <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => window.open("/options", "_blank")}
+            className="p-2 bg-gray-700 text-white rounded-full"
           >
-            {language === "th" ? "เปลี่ยนเป็น English" : "เปลี่ยนเป็น ภาษาไทย"}
+            ⚙
           </button>
           <button
             onClick={openWordManager}
