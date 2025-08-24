@@ -12,6 +12,10 @@ import { db } from "./firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function App() {
+  const playSound = (file) => {
+  const audio = new Audio(file);
+  audio.play();
+  };
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
@@ -133,12 +137,13 @@ useEffect(() => {
         setDamageText(damage);
         setTimeout(() => setDamageText(null), 800);
         setTimeout(() => setEnemyShake(false), 400);
+        playSound("/sound/correct.wav")
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
       }
-
+      
       // รีเซ็ตการพิมพ์
       setTypedIndexes([]);
       setInputValue("");
