@@ -187,20 +187,31 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Enemy */}
-      <div className="flex justify-center items-center my-5">
-        <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-          <EnemyBox image={enemyImage} health={enemyHealth} name={enemyname} maxhealth={enemyMaxHealth}/>
-          {damageText && <div className="damage-float">{damageText}</div>}
+      <div className="flex items-center my-5">
+        {/* Enemy Box อยู่กลาง */}
+        <div className="flex-1 flex justify-center">
+          <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
+            <EnemyBox 
+              image={enemyImage} 
+              health={enemyHealth} 
+              name={enemyname} 
+              maxhealth={enemyMaxHealth}
+            />
+            {damageText && <div className="damage-float">{damageText}</div>}
+          </div>
+        </div>
+
+        {/* Textbox ชิดขวาสุด */}
+        <div className="ml-auto">
+          <Textbox 
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
         </div>
       </div>
-      <div className="flex justify-center items-end ">
-        <Textbox 
-        word={enemyWord}
-        typedIndexes={typedIndexes}
-        language={language}
-        />
-      </div>
+
+      
 
       {/* InfoBar */}
       <GameInfoBar
