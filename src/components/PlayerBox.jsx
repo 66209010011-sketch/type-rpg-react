@@ -7,7 +7,7 @@ export default function Textbox({ word, language, typedIndexes}) {
   
   return (
     <div className="text-center justify-end bg-black/50 p-6 border rounded border-white ">
-      <p className="font-semibold">คำศัพท์:</p>
+      <p className="font-semibold text-white">คำศัพท์:</p>
         <p className="flex justify-center flex-wrap text-black font-['K2D'] text-2xl">
           {chars.map((char, idx) => {
               const state = typedIndexes[idx];
