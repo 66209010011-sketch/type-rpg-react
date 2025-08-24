@@ -142,6 +142,7 @@ useEffect(() => {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
+        playSound("/sound/playerhit.wav")
       }
       
       // รีเซ็ตการพิมพ์
