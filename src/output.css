@@ -204,6 +204,9 @@
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
+  .right-1\/2 {
+    right: calc(1/2 * 100%);
+  }
   .-left-\[9999px\] {
     left: calc(9999px * -1);
   }

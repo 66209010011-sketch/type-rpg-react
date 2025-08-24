@@ -200,7 +200,7 @@ useEffect(() => {
         </div>
 
         {/* Textbox ชิดขวาสุดแบบ absolute */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+        <div className="absolute right-1/2 top-1/2 -translate-y-1/2">
           <Textbox 
             word={enemyWord}
             typedIndexes={typedIndexes}
