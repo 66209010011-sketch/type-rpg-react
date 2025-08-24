@@ -422,7 +422,7 @@
     text-align: center;
   }
   .font-\[\'Bitcount\'\] {
-    font-family: 'Bitcount';
+    font-family: "Bitcount Prop Double", system-ui;
   }
   .font-\[\'K2D\'\] {
     font-family: 'K2D';
