@@ -18,9 +18,9 @@ export default function GameInfoBar({word, health, playerName, language, startTi
       
       <div className="mt-4 flex justify-center gap-6 font-['Bitcount']">
         <div className="flex items-center gap-4">
-          <img src="pic/wpm.png" alt="" className="w-[8vw]" />
+          <img src="pic/wpm.png" alt="" className="w-[7vw]" />
           <span className="font-bold text-3xl">{wpm}</span>
-          <img src="pic/accuracy.png" alt="" className="w-[8vw]" />
+          <img src="pic/accuracy.png" alt="" className="w-[7vw]" />
           <span className="font-bold text-3xl">{accuracy}%</span>
         </div>
       </div>
