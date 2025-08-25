@@ -271,6 +271,9 @@
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
+  .w-\[1vw\] {
+    width: 1vw;
+  }
   .w-\[7vw\] {
     width: 7vw;
   }
@@ -288,6 +291,9 @@
   }
   .w-\[15vw\] {
     width: 15vw;
+  }
+  .w-\[17vw\] {
+    width: 17vw;
   }
   .w-\[18vw\] {
     width: 18vw;
@@ -448,6 +454,9 @@
   }
   .bg-\[url\(\/pic\/button\.png\)\] {
     background-image: url(/pic/button.png);
+  }
+  .bg-\[url\(\/pic\/button480\.png\)\] {
+    background-image: url(/pic/button480.png);
   }
   .bg-\[url\(\/pic\/buttto\.jpg\)\] {
     background-image: url(/pic/buttto.jpg);
