@@ -216,15 +216,6 @@ useEffect(() => {
           />
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
-
-        {/* Textbox ชิดขวาสุดแบบ absolute */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2">
-          <Textbox 
-            word={enemyWord}
-            typedIndexes={typedIndexes}
-            language={language}
-          />
-        </div>
       </div>
 
 
