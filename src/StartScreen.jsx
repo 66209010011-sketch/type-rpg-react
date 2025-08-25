@@ -9,13 +9,13 @@ export default function StartScreen() {
       <img src="/pic/logo/logorpg2.png" alt="" />
       <button 
         onClick={() => navigate("/stage-select")} 
-        className="bg-[url(/pic/button.png)] bg-no-repeat bg-[length:100%_100%] w-[15vw] px-6 py-3 text-2xl mb-4"
+        className="bg-[url(/pic/button.png)] bg-no-repeat bg-cover w-[15vw] px-6 py-3 text-2xl mb-4"
       >
         ▶ Play
       </button>
       <button 
         onClick={() => navigate("/options")} 
-        className="bg-[url(/pic/button.png)] bg-no-repeat bg-[length:100%_100%] w-[10vw] px-6 py-3 text-2xl"
+        className="bg-[url(/pic/button.png)] bg-no-repeat bg-cover w-[10vw] px-6 py-3 text-2xl"
       >
         ⚙ Options
       </button>
