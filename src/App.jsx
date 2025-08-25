@@ -182,13 +182,20 @@ useEffect(() => {
       {playerHit && <div className="player-hit-overlay"></div>}
 
       {/* Logo + Buttons */}
-      <div className="flex items-center justify-between w-full mb-4">
+      <div className="flex items-center justify-between w-full mb-4 relative">
         <img
           src="pic/logo/logotrpg.png"
           alt="logo"
           className="object-cover w-[20vw] h-[10vw]"
         />
 
+        <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2">
+          <Textbox 
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => window.open("/options", "_blank")}
@@ -213,11 +220,17 @@ useEffect(() => {
             health={enemyHealth} 
             name={enemyname} 
             maxhealth={enemyMaxHealth}
+          />
+          {damageText && <div className="damage-float">{damageText}</div>}
+        </div>
+
+        {/* Textbox ชิดขวาสุดแบบ absolute */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+          <Textbox 
             word={enemyWord}
             typedIndexes={typedIndexes}
             language={language}
           />
-          {damageText && <div className="damage-float">{damageText}</div>}
         </div>
       </div>
 
