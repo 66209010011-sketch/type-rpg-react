@@ -10,13 +10,13 @@ export default function StartScreen() {
       
       <button 
         onClick={() => navigate("/stage-select")} 
-        className="bg-[url(/pic/button480.png)] bg-no-repeat bg-contain w-[480px] h-auto px-6 py-3 text-2xl mb-4"
+        className="bg-[url(/pic/button480.png)] bg-no-repeat bg-cover w-[480px] h-auto px-6 py-3 text-2xl mb-4"
       >
         ▶ Play
       </button>
       <button 
         onClick={() => navigate("/options")} 
-        className="bg-[url(/pic/button.png)] bg-no-repeat bg-contain w-[240px] h-auto px-6 py-3 text-2xl"
+        className="bg-[url(/pic/button.png)] bg-no-repeat bg-cover w-[240px] h-auto px-6 py-3 text-2xl"
       >
         ⚙ Options
       </button>
