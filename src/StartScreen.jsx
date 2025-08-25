@@ -5,17 +5,17 @@ export default function StartScreen() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-[url(/pic/scene/startscreen.gif)] text-white">
-      <h1 className="text-5xl font-bold mb-8">Typing RPG</h1>
+    <div className="flex flex-col items-center justify-center h-screen bg-[url(/pic/scene/startscreen.gif)] bg-no-repeat bg-cover text-white">
+      <img src="/pic/logo/logorpg2.png" alt="" />
       <button 
         onClick={() => navigate("/stage-select")} 
-        className="bg-[url(/pic/button.png)] px-6 py-3 text-2xl mb-4"
+        className="bg-[url(/pic/button.png)] bg-no-repeat bg-[length:100%_100%] w-[15vw] px-6 py-3 text-2xl mb-4"
       >
         ▶ Play
       </button>
       <button 
         onClick={() => navigate("/options")} 
-        className="bg-[url(/pic/button.png)] px-6 py-3 text-2xl"
+        className="bg-[url(/pic/button.png)] bg-no-repeat bg-[length:100%_100%] w-[10vw] px-6 py-3 text-2xl"
       >
         ⚙ Options
       </button>

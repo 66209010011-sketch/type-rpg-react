@@ -274,8 +274,20 @@
   .w-\[7vw\] {
     width: 7vw;
   }
+  .w-\[10\] {
+    width: 10;
+  }
+  .w-\[10vw\] {
+    width: 10vw;
+  }
   .w-\[12vw\] {
     width: 12vw;
+  }
+  .w-\[15\] {
+    width: 15;
+  }
+  .w-\[15vw\] {
+    width: 15vw;
   }
   .w-\[18vw\] {
     width: 18vw;
@@ -451,6 +463,15 @@
   }
   .bg-\[url\(\/pic\/scene\/statr\.png\)\] {
     background-image: url(/pic/scene/statr.png);
+  }
+  .bg-\[length\:100\%_100\%\] {
+    background-size: 100% 100%;
+  }
+  .bg-cover {
+    background-size: cover;
+  }
+  .bg-no-repeat {
+    background-repeat: no-repeat;
   }
   .object-contain {
     object-fit: contain;
