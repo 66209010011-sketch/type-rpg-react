@@ -71,3 +71,13 @@ body {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(15px); } /* เลื่อนลง 15px */
+  100% { transform: translateY(0px); }
+}
+
+.enemy-float {
+  animation: float 2s ease-in-out infinite;
+}

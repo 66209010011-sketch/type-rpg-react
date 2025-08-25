@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";  
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Textbox from "./components/PlayerBox";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
-import Healthbar from "./components/Healthbar";
 import { splitByLanguage } from "./utils/thaiSplit.js";
+import { db } from "./firebase";
 import "./output.css";
 
-// Firebase
-import { db } from "./firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
-
 export default function App() {
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+
   const playSound = (file) => {
-  const audio = new Audio(file);
-  audio.play();
+    const audio = new Audio(file);
+    audio.play();
   };
+
   const location = useLocation();
   const { difficulty, language: initialLanguage } = location.state || {
     difficulty: 1,
     language: "th",
   };
+
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
@@ -36,7 +38,8 @@ export default function App() {
   const [enemyImage, setEnemyImage] = useState("");
   const [enemyname, setEnemyName] = useState("");
   const playerName = "นักรบ";
-  
+  const [elapsedTime, setElapsedTime] = useState("0:00");
+
   // Effect states
   const [playerHit, setPlayerHit] = useState(false);
   const [damageText, setDamageText] = useState(null);
@@ -45,6 +48,20 @@ export default function App() {
   const [startTime, setStartTime] = useState(null);
   const [typedCount, setTypedCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+
+  // 🔹 เลือกเพลงตาม difficulty
+  const getMusicByDifficulty = () => {
+    switch (difficulty) {
+      case 1:
+        return "/music/firststatesong.mp3";
+      case 2:
+        return "/music/medium.mp3";
+      case 3:
+        return "/music/hard.mp3";
+      default:
+        return "/music/easy.mp3";
+    }
+  };
 
   // โหลดคำจาก Firebase
   useEffect(() => {
@@ -64,49 +81,47 @@ export default function App() {
       }
     };
     loadWords();
-  }, [language]);
+  }, [language, difficulty]);
 
   useEffect(() => {
-      const loadEnemies = async () => {
-          const qe = query(
-          collection(db, "enemies"),
-          where("difficulty", "==", difficulty)
-        );
-        const snapshot = await getDocs(qe);
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEnemies(data);
+    const loadEnemies = async () => {
+      const qe = query(
+        collection(db, "enemies"),
+        where("difficulty", "==", difficulty)
+      );
+      const snapshot = await getDocs(qe);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEnemies(data);
 
-        if (data.length > 0) {
-          const enemy = data[Math.floor(Math.random() * data.length)];
-          setCurrentEnemy(enemy);
-          setEnemyMaxHealth(enemy.health);
-          setEnemyHealth(enemy.health);   // ต้องเซ็ตเลือดจริงด้วย
-          setEnemyImage(enemy.image);
-          setEnemyName(enemy.name);
-        }
-      };
+      if (data.length > 0) {
+        const enemy = data[Math.floor(Math.random() * data.length)];
+        setCurrentEnemy(enemy);
+        setEnemyMaxHealth(enemy.health);
+        setEnemyHealth(enemy.health);
+        setEnemyImage(enemy.image);
+        setEnemyName(enemy.name);
+      }
+    };
 
-      loadEnemies();
-    }, []);
+    loadEnemies();
+  }, [difficulty]);
 
   // สลับศัตรูเมื่อ HP หมด
-useEffect(() => {
-  if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
-    const newEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-    setCurrentEnemy(newEnemy);
-    setEnemyMaxHealth(newEnemy.health);
-    setEnemyHealth(newEnemy.health);  // รีเซ็ตเลือดใหม่
-    setEnemyImage(newEnemy.image);
-    setEnemyName(newEnemy.name);
-    setTypedIndexes([]);
-    setInputValue("");
-  }
-}, [enemyHealth, enemies]);  // ✅ ใช้ enemyHealth
-
-
+  useEffect(() => {
+    if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
+      const newEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+      setCurrentEnemy(newEnemy);
+      setEnemyMaxHealth(newEnemy.health);
+      setEnemyHealth(newEnemy.health);
+      setEnemyImage(newEnemy.image);
+      setEnemyName(newEnemy.name);
+      setTypedIndexes([]);
+      setInputValue("");
+    }
+  }, [enemyHealth, enemies]);
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
 
@@ -120,30 +135,27 @@ useEffect(() => {
       const status = inputChars[i] === enemyChars[i] ? "correct" : "incorrect";
       newStatuses[i] = status;
 
-      // ✅ นับจำนวนพิมพ์
       if (typedIndexes[i] !== status) {
         setTypedCount((c) => c + 1);
         if (status === "correct") {
           setCorrectCount((c) => c + 1);
           playSound("/sound/correct.wav");
-        } 
+        }
         if (status === "incorrect") {
           playSound("/sound/incorrect.wav");
         }
-      }  
+      }
     }
 
     setTypedIndexes(newStatuses);
     setInputValue(text);
 
-    // Accuracy
     const correctNow = newStatuses.filter((x) => x === "correct").length;
     const accuracy = (correctNow / enemyChars.length) * 100;
 
-    // จบคำ
     if (inputChars.length === enemyChars.length && wordList.length > 0) {
       if (accuracy >= 75) {
-        const damage = enemyChars.length * 1; // difficulty
+        const damage = enemyChars.length * 1;
         setEnemyHealth((prev) => Math.max(prev - damage, 0));
         setEnemyShake(true);
         setDamageText(damage);
@@ -156,8 +168,7 @@ useEffect(() => {
         setTimeout(() => setPlayerHit(false), 300);
         playSound("/sound/playerhit.wav");
       }
-      
-      // รีเซ็ตการพิมพ์
+
       setTypedIndexes([]);
       setInputValue("");
       const newWord = wordList[Math.floor(Math.random() * wordList.length)];
@@ -167,7 +178,6 @@ useEffect(() => {
 
   const toggleLanguage = () => {
     setLanguage((prev) => (prev === "th" ? "en" : "th"));
-    // ✅ รีเซ็ตตัวนับเมื่อเปลี่ยนภาษา
     setStartTime(null);
     setTypedCount(0);
     setCorrectCount(0);
@@ -177,25 +187,74 @@ useEffect(() => {
     window.open("/word-manager", "_blank");
   };
 
+  // ตัวจับเวลา
+  useEffect(() => {
+    let timer;
+    if (startTime) {
+      timer = setInterval(() => {
+        const diffMs = Date.now() - startTime;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        setElapsedTime(formatted);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [startTime]);
+
+  // จัดการเพลง
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.10;
+      audioRef.current.play().catch(() => {
+        console.log("Auto-play ถูกบล็อก ต้องให้ user กด interaction ก่อน");
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+      audioRef.current.volume = 0.10;
+      audioRef.current.play().catch(() => {});
+    }
+  }, [difficulty]);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(audioRef.current.muted);
+    }
+  };
+
   return (
     <div className="p-4 relative">
       {playerHit && <div className="player-hit-overlay"></div>}
 
-      {/* Logo + Buttons */}
-      <div className="flex items-center justify-between w-full mb-4">
+      {/* เพลงแบ็คกราวด์ */}
+      <audio ref={audioRef} autoPlay loop>
+        <source src={getMusicByDifficulty()} type="audio/mpeg" />
+      </audio>
+
+      {/* ปุ่มปิด/เปิดเสียง */}
+      <button
+        onClick={toggleMute}
+        className={`fixed top-4 right-4 z-50 p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
+          isMuted ? "bg-red-500" : "bg-green-500"
+        } text-white`}
+      >
+        {isMuted ? "🔇" : "🔊"}
+      </button>
+
+      {/* Header */}
+      <div className="flex items-center w-full mb-4">
         <img
           src="pic/logo/logotrpg.png"
           alt="logo"
           className="object-cover w-[20vw] h-[10vw]"
         />
-
         <div className="flex gap-2">
-          <button
-            onClick={() => window.open("/options", "_blank")}
-            className="p-2 bg-gray-700 text-white rounded-full"
-          >
-            ⚙
-          </button>
           <button
             onClick={openWordManager}
             className="px-4 py-2 bg-green-500 text-white rounded"
@@ -205,31 +264,32 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Enemy Box ชิดขวาบน ใกล้ฟันเฟือง */}
-      <div className={`absolute right-10 top-20 enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-        <EnemyBox 
-          image={enemyImage} 
-          health={enemyHealth} 
-          name={enemyname} 
-          maxhealth={enemyMaxHealth}
-        />
-        {damageText && <div className="damage-float">{damageText}</div>}
+      <div className="relative">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <Textbox
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
+        </div>
+
+        <div className="flex justify-end mt-10 mr-20">
+          <div
+            className={`enemy-box ${
+              enemyShake ? "enemy-shake" : "enemy-float"
+            }`}
+          >
+            <EnemyBox
+              image={enemyImage}
+              health={enemyHealth}
+              name={enemyname}
+              maxhealth={enemyMaxHealth}
+            />
+            {damageText && <div className="damage-float">{damageText}</div>}
+          </div>
+        </div>
       </div>
 
-      {/* ✅ Textbox ใต้ EnemyBox */}
-      <div className="absolute right-10 top-[calc(20vh+200px)] w-[20vw]">
-        <Textbox 
-          word={enemyWord}
-          typedIndexes={typedIndexes}
-          language={language}
-        />
-      </div>
-
-
-
-      
-
-      {/* InfoBar */}
       <GameInfoBar
         word={enemyWord}
         typedIndexes={typedIndexes}
@@ -239,6 +299,7 @@ useEffect(() => {
         startTime={startTime}
         typedCount={typedCount}
         correctCount={correctCount}
+        elapsedTime={elapsedTime}
       />
 
       <TypingBox onTyping={handleTyping} inputValue={inputValue} />

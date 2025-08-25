@@ -133,6 +133,17 @@ export default function WordManager() {
     }
   };
 
+  // ลบทุกคำศัพท์
+const clearAllWords = async () => {
+  if (!window.confirm("⚠️ ต้องการลบทุกคำศัพท์ในฐานข้อมูลหรือไม่?")) return;
+
+  const snapshot = await getDocs(collection(db, "words"));
+  const batchDelete = snapshot.docs.map((d) => deleteDoc(doc(db, "words", d.id)));
+
+  await Promise.all(batchDelete);
+  alert("✅ ลบคำศัพท์ทั้งหมดเรียบร้อยแล้ว");
+  await loadWords();
+};
   return (
     <div className="p-6 bg-white">
       <h1 className="text-xl font-bold mb-4">Word & Enemy Manager</h1>
@@ -151,6 +162,14 @@ export default function WordManager() {
           <input type="file" accept=".json" className="hidden" onChange={handleImportEnemies} />
         </label>
       </div>
+      {/* ปุ่ม Clear All */}
+      <button
+        onClick={clearAllWords}
+        className="bg-red-600 text-white px-4 py-2 rounded"
+      >
+        🗑️ เคลียร์ทุกคำศัพท์
+      </button>
+
 
       {/* ตาราง Words */}
       <h2 className="text-lg font-bold mt-6">📖 Words</h2>
