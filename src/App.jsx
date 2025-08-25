@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";  
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import Textbox from "./components/PlayerBox";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
@@ -84,44 +84,54 @@ export default function App() {
   }, [language, difficulty]);
 
   useEffect(() => {
-    const loadEnemies = async () => {
-      const qe = query(
-        collection(db, "enemies"),
-        where("difficulty", "==", difficulty)
-      );
-      const snapshot = await getDocs(qe);
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setEnemies(data);
+  const loadEnemies = async () => {
+    const qe = query(
+      collection(db, "enemies"),
+      where("difficulty", "==", difficulty),
+      orderBy("order", "asc")   // ✅ เรียงตาม field order
+    );
+    const snapshot = await getDocs(qe);
+    console.log("Snapshot docs:", snapshot.docs);
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setEnemies(data);
 
-      if (data.length > 0) {
-        const enemy = data[Math.floor(Math.random() * data.length)];
-        setCurrentEnemy(enemy);
-        setEnemyMaxHealth(enemy.health);
-        setEnemyHealth(enemy.health);
-        setEnemyImage(enemy.image);
-        setEnemyName(enemy.name);
-      }
-    };
+    if (data.length > 0) {
+      const firstEnemy = data[0];   // ✅ ตัวแรกคือ order = 1
+      setCurrentEnemy(firstEnemy);
+      setEnemyMaxHealth(firstEnemy.health);
+      setEnemyHealth(firstEnemy.health);
+      setEnemyImage(firstEnemy.image);
+      setEnemyName(firstEnemy.name);
+    }
+  };
 
-    loadEnemies();
-  }, [difficulty]);
+  loadEnemies();
+}, [difficulty]);
 
   // สลับศัตรูเมื่อ HP หมด
   useEffect(() => {
-    if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
-      const newEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-      setCurrentEnemy(newEnemy);
-      setEnemyMaxHealth(newEnemy.health);
-      setEnemyHealth(newEnemy.health);
-      setEnemyImage(newEnemy.image);
-      setEnemyName(newEnemy.name);
+  if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
+    const currentIndex = enemies.findIndex(e => e.id === currentEnemy.id);
+    const nextIndex = currentIndex + 1;
+
+    if (nextIndex < enemies.length) {
+      const nextEnemy = enemies[nextIndex];  // ✅ เลือกศัตรูถัดไปตาม order
+      setCurrentEnemy(nextEnemy);
+      setEnemyMaxHealth(nextEnemy.health);
+      setEnemyHealth(nextEnemy.health);
+      setEnemyImage(nextEnemy.image);
+      setEnemyName(nextEnemy.name);
       setTypedIndexes([]);
       setInputValue("");
+    } else {
+      console.log("🎉 ศัตรูหมดแล้ว เคลียร์ด่าน!");
+      // 👉 ตรงนี้คุณจะใส่ logic เช่นไปหน้าชนะเกม หรือวน loop ต่อก็ได้
     }
-  }, [enemyHealth, enemies]);
+  }
+}, [enemyHealth, enemies, currentEnemy]);
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
 
