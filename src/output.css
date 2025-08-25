@@ -301,8 +301,26 @@
   .w-\[20vw\] {
     width: 20vw;
   }
+  .w-\[160\] {
+    width: 160;
+  }
+  .w-\[240\] {
+    width: 240;
+  }
+  .w-\[240px\] {
+    width: 240px;
+  }
+  .w-\[260\] {
+    width: 260;
+  }
   .w-\[400px\] {
     width: 400px;
+  }
+  .w-\[480\] {
+    width: 480;
+  }
+  .w-\[480px\] {
+    width: 480px;
   }
   .w-\[vw\] {
     width: vw;
@@ -382,9 +400,6 @@
   }
   .border-white {
     border-color: var(--color-white);
-  }
-  .bg-\[\<value\>\] {
-    background-color: <value>;
   }
   .bg-black {
     background-color: var(--color-black);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";  
 import Textbox from "./components/PlayerBox";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
@@ -16,13 +17,18 @@ export default function App() {
   const audio = new Audio(file);
   audio.play();
   };
+  const location = useLocation();
+  const { difficulty, language: initialLanguage } = location.state || {
+    difficulty: 1,
+    language: "th",
+  };
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
   const [typedIndexes, setTypedIndexes] = useState([]);
   const [health, setPlayerHP] = useState(100);
   const [inputValue, setInputValue] = useState("");
-  const [language, setLanguage] = useState("th");
+  const [language, setLanguage] = useState(initialLanguage);
   const [wordList, setWordList] = useState([]);
   const [enemyShake, setEnemyShake] = useState(false);
   const [enemyHealth, setEnemyHealth] = useState(null);
@@ -30,7 +36,6 @@ export default function App() {
   const [enemyImage, setEnemyImage] = useState("");
   const [enemyname, setEnemyName] = useState("");
   const playerName = "นักรบ";
-  const difficulty = 1 ;
   
   // Effect states
   const [playerHit, setPlayerHit] = useState(false);
@@ -46,7 +51,8 @@ export default function App() {
     const loadWords = async () => {
       const q = query(
         collection(db, "words"),
-        where("language", "==", language.toUpperCase())
+        where("language", "==", language.toUpperCase()),
+        where("difficulty", "==", difficulty)
       );
       const snapshot = await getDocs(q);
       const words = snapshot.docs.map((doc) => doc.data().word);
