@@ -470,6 +470,9 @@
   .bg-\[length\:100\%_100\%\] {
     background-size: 100% 100%;
   }
+  .bg-contain {
+    background-size: contain;
+  }
   .bg-cover {
     background-size: cover;
   }
