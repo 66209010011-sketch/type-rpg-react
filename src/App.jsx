@@ -182,7 +182,7 @@ useEffect(() => {
       {playerHit && <div className="player-hit-overlay"></div>}
 
       {/* Logo + Buttons */}
-      <div className="flex items-center justify-between w-full mb-4 relative">
+      <div className="flex items-center justify-between w-full mb-4">
         <img
           src="pic/logo/logotrpg.png"
           alt="logo"
@@ -206,17 +206,8 @@ useEffect(() => {
       </div>
 
       <div className="relative my-5 flex justify-center">
-        {/* กล่อง Enemy */}
+        {/* EnemyBox อยู่กลาง ไม่ขยับ */}
         <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-          {/* ✅ Textbox ชิดบนกลางศัตรู */}
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2">
-            <Textbox 
-              word={enemyWord}
-              typedIndexes={typedIndexes}
-              language={language}
-            />
-          </div>
-
           <EnemyBox 
             image={enemyImage} 
             health={enemyHealth} 
@@ -225,7 +216,19 @@ useEffect(() => {
           />
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
+
+        {/* Textbox ชิดขวาสุดแบบ absolute */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+          <Textbox 
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
+        </div>
       </div>
+
+
+      
 
       {/* InfoBar */}
       <GameInfoBar
