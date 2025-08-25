@@ -213,6 +213,9 @@ useEffect(() => {
             health={enemyHealth} 
             name={enemyname} 
             maxhealth={enemyMaxHealth}
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
           />
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
