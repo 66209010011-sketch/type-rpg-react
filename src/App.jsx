@@ -189,7 +189,7 @@ useEffect(() => {
           className="object-cover w-[20vw] h-[10vw]"
         />
 
-        <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2">
+        <div className="absolute left-1/2 transform -translate-x-1/2 top-full ">
           <Textbox 
             word={enemyWord}
             typedIndexes={typedIndexes}
