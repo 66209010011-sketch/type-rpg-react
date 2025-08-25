@@ -205,26 +205,27 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Enemy Box ชิดขวาบน ใกล้ฟันเฟือง */}
-      <div className={`absolute right-10 top-20 enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-        <EnemyBox 
-          image={enemyImage} 
-          health={enemyHealth} 
-          name={enemyname} 
-          maxhealth={enemyMaxHealth}
-        />
-        {damageText && <div className="damage-float">{damageText}</div>}
-      </div>
+      <div className="relative my-5 flex justify-center">
+        {/* EnemyBox อยู่กลาง ไม่ขยับ */}
+        <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
+          <EnemyBox 
+            image={enemyImage} 
+            health={enemyHealth} 
+            name={enemyname} 
+            maxhealth={enemyMaxHealth}
+          />
+          {damageText && <div className="damage-float">{damageText}</div>}
+        </div>
 
-      {/* ✅ Textbox ใต้ EnemyBox */}
-      <div className="absolute right-10 top-[calc(20vh+200px)] w-[20vw]">
-        <Textbox 
-          word={enemyWord}
-          typedIndexes={typedIndexes}
-          language={language}
-        />
+        {/* Textbox ชิดขวาสุดแบบ absolute */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2">
+          <Textbox 
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
+        </div>
       </div>
-
 
 
       

@@ -7,6 +7,7 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-100: oklch(93.6% 0.032 17.717);
     --color-red-300: oklch(80.8% 0.114 19.571);
     --color-red-500: oklch(63.7% 0.237 25.331);
     --color-orange-400: oklch(75% 0.183 55.934);
@@ -34,8 +35,6 @@
     --text-2xl--line-height: calc(2 / 1.5);
     --text-3xl: 1.875rem;
     --text-3xl--line-height: calc(2.25 / 1.875);
-    --text-4xl: 2.25rem;
-    --text-4xl--line-height: calc(2.5 / 2.25);
     --text-5xl: 3rem;
     --text-5xl--line-height: 1;
     --font-weight-semibold: 600;
@@ -209,23 +208,11 @@
   .top-1\/2 {
     top: calc(1/2 * 100%);
   }
-  .top-20 {
-    top: calc(var(--spacing) * 20);
-  }
-  .top-\[calc\(20vh\+200px\)\] {
-    top: calc(20vh + 200px);
-  }
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
-  .right-10 {
-    right: calc(var(--spacing) * 10);
-  }
   .-left-\[9999px\] {
     left: calc(9999px * -1);
-  }
-  .mx-1 {
-    margin-inline: calc(var(--spacing) * 1);
   }
   .mx-\[2px\] {
     margin-inline: 2px;
@@ -239,17 +226,14 @@
   .mt-6 {
     margin-top: calc(var(--spacing) * 6);
   }
-  .mb-2 {
-    margin-bottom: calc(var(--spacing) * 2);
-  }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
   }
-  .mb-15 {
-    margin-bottom: calc(var(--spacing) * 15);
+  .mb-8 {
+    margin-bottom: calc(var(--spacing) * 8);
   }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
@@ -262,9 +246,6 @@
   }
   .hidden {
     display: none;
-  }
-  .inline-flex {
-    display: inline-flex;
   }
   .table {
     display: table;
@@ -290,11 +271,14 @@
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
-  .w-\[5vw\] {
-    width: 5vw;
+  .w-\[1vw\] {
+    width: 1vw;
   }
   .w-\[7vw\] {
     width: 7vw;
+  }
+  .w-\[10\] {
+    width: 10;
   }
   .w-\[10vw\] {
     width: 10vw;
@@ -302,17 +286,47 @@
   .w-\[12vw\] {
     width: 12vw;
   }
+  .w-\[15\] {
+    width: 15;
+  }
+  .w-\[15vw\] {
+    width: 15vw;
+  }
+  .w-\[5vw\] {
+    width: 5vw;
+  }
+  .w-\[17vw\] {
+    width: 17vw;
+  }
   .w-\[18vw\] {
     width: 18vw;
   }
   .w-\[20vw\] {
     width: 20vw;
   }
-  .w-\[30vw\] {
-    width: 30vw;
+  .w-\[160\] {
+    width: 160;
+  }
+  .w-\[240\] {
+    width: 240;
+  }
+  .w-\[240px\] {
+    width: 240px;
+  }
+  .w-\[260\] {
+    width: 260;
   }
   .w-\[400px\] {
     width: 400px;
+  }
+  .w-\[480\] {
+    width: 480;
+  }
+  .w-\[480px\] {
+    width: 480px;
+  }
+  .w-\[vw\] {
+    width: vw;
   }
   .w-full {
     width: 100%;
@@ -414,6 +428,9 @@
   .bg-gray-700 {
     background-color: var(--color-gray-700);
   }
+  .bg-gray-800 {
+    background-color: var(--color-gray-800);
+  }
   .bg-gray-900 {
     background-color: var(--color-gray-900);
   }
@@ -441,14 +458,44 @@
   .bg-yellow-400 {
     background-color: var(--color-yellow-400);
   }
+  .bg-\[url\(\/\/mountains\.jpg\)\] {
+    background-image: url(//mountains.jpg);
+  }
+  .bg-\[url\(\/img\/mountains\.jpg\)\] {
+    background-image: url(/img/mountains.jpg);
+  }
+  .bg-\[url\(\/pic\/\.jpg\)\] {
+    background-image: url(/pic/.jpg);
+  }
+  .bg-\[url\(\/pic\/button\.jpg\)\] {
+    background-image: url(/pic/button.jpg);
+  }
   .bg-\[url\(\/pic\/button\.png\)\] {
     background-image: url(/pic/button.png);
   }
   .bg-\[url\(\/pic\/button480\.png\)\] {
     background-image: url(/pic/button480.png);
   }
+  .bg-\[url\(\/pic\/buttto\.jpg\)\] {
+    background-image: url(/pic/buttto.jpg);
+  }
+  .bg-\[url\(\/pic\/mountains\.jpg\)\] {
+    background-image: url(/pic/mountains.jpg);
+  }
+  .bg-\[url\(\/pic\/scene\/start\.png\)\] {
+    background-image: url(/pic/scene/start.png);
+  }
   .bg-\[url\(\/pic\/scene\/startscreen\.gif\)\] {
     background-image: url(/pic/scene/startscreen.gif);
+  }
+  .bg-\[url\(\/pic\/scene\/startscreen\.png\)\] {
+    background-image: url(/pic/scene/startscreen.png);
+  }
+  .bg-\[url\(\/pic\/scene\/statr\.png\)\] {
+    background-image: url(/pic/scene/statr.png);
+  }
+  .bg-\[length\:100\%_100\%\] {
+    background-size: 100% 100%;
   }
   .bg-contain {
     background-size: contain;
@@ -511,10 +558,6 @@
   .text-3xl {
     font-size: var(--text-3xl);
     line-height: var(--tw-leading, var(--text-3xl--line-height));
-  }
-  .text-4xl {
-    font-size: var(--text-4xl);
-    line-height: var(--tw-leading, var(--text-4xl--line-height));
   }
   .text-5xl {
     font-size: var(--text-5xl);
