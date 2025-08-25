@@ -211,12 +211,6 @@
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
-  .right-1 {
-    right: calc(var(--spacing) * 1);
-  }
-  .right-1\/2 {
-    right: calc(1/2 * 100%);
-  }
   .-left-\[9999px\] {
     left: calc(9999px * -1);
   }
@@ -243,9 +237,6 @@
   }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
-  }
-  .ml-auto {
-    margin-left: auto;
   }
   .contents {
     display: contents;
@@ -280,17 +271,8 @@
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
-  .w-\[5vw\] {
-    width: 5vw;
-  }
   .w-\[7vw\] {
     width: 7vw;
-  }
-  .w-\[8vw\] {
-    width: 8vw;
-  }
-  .w-\[10vw\] {
-    width: 10vw;
   }
   .w-\[12vw\] {
     width: 12vw;
@@ -309,9 +291,6 @@
   }
   .max-w-\[400px\] {
     max-width: 400px;
-  }
-  .flex-1 {
-    flex: 1;
   }
   .border-collapse {
     border-collapse: collapse;
@@ -383,6 +362,9 @@
   .border-white {
     border-color: var(--color-white);
   }
+  .bg-\[\<value\>\] {
+    background-color: <value>;
+  }
   .bg-black {
     background-color: var(--color-black);
   }
@@ -425,9 +407,6 @@
   .bg-purple-500 {
     background-color: var(--color-purple-500);
   }
-  .bg-red-100 {
-    background-color: var(--color-red-100);
-  }
   .bg-red-300 {
     background-color: var(--color-red-300);
   }
@@ -439,6 +418,39 @@
   }
   .bg-yellow-400 {
     background-color: var(--color-yellow-400);
+  }
+  .bg-\[url\(\/\/mountains\.jpg\)\] {
+    background-image: url(//mountains.jpg);
+  }
+  .bg-\[url\(\/img\/mountains\.jpg\)\] {
+    background-image: url(/img/mountains.jpg);
+  }
+  .bg-\[url\(\/pic\/\.jpg\)\] {
+    background-image: url(/pic/.jpg);
+  }
+  .bg-\[url\(\/pic\/button\.jpg\)\] {
+    background-image: url(/pic/button.jpg);
+  }
+  .bg-\[url\(\/pic\/button\.png\)\] {
+    background-image: url(/pic/button.png);
+  }
+  .bg-\[url\(\/pic\/buttto\.jpg\)\] {
+    background-image: url(/pic/buttto.jpg);
+  }
+  .bg-\[url\(\/pic\/mountains\.jpg\)\] {
+    background-image: url(/pic/mountains.jpg);
+  }
+  .bg-\[url\(\/pic\/scene\/start\.png\)\] {
+    background-image: url(/pic/scene/start.png);
+  }
+  .bg-\[url\(\/pic\/scene\/startscreen\.gif\)\] {
+    background-image: url(/pic/scene/startscreen.gif);
+  }
+  .bg-\[url\(\/pic\/scene\/startscreen\.png\)\] {
+    background-image: url(/pic/scene/startscreen.png);
+  }
+  .bg-\[url\(\/pic\/scene\/statr\.png\)\] {
+    background-image: url(/pic/scene/statr.png);
   }
   .object-contain {
     object-fit: contain;
