@@ -189,13 +189,6 @@ useEffect(() => {
           className="object-cover w-[20vw] h-[10vw]"
         />
 
-        <div className="absolute left-1/2 transform -translate-x-1/2 top-full ">
-          <Textbox 
-            word={enemyWord}
-            typedIndexes={typedIndexes}
-            language={language}
-          />
-        </div>
         <div className="flex gap-2">
           <button
             onClick={() => window.open("/options", "_blank")}
@@ -213,8 +206,17 @@ useEffect(() => {
       </div>
 
       <div className="relative my-5 flex justify-center">
-        {/* EnemyBox อยู่กลาง ไม่ขยับ */}
+        {/* กล่อง Enemy */}
         <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
+          {/* ✅ Textbox ชิดบนกลางศัตรู */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+            <Textbox 
+              word={enemyWord}
+              typedIndexes={typedIndexes}
+              language={language}
+            />
+          </div>
+
           <EnemyBox 
             image={enemyImage} 
             health={enemyHealth} 
@@ -223,19 +225,7 @@ useEffect(() => {
           />
           {damageText && <div className="damage-float">{damageText}</div>}
         </div>
-
-        {/* Textbox ชิดขวาสุดแบบ absolute */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2">
-          <Textbox 
-            word={enemyWord}
-            typedIndexes={typedIndexes}
-            language={language}
-          />
-        </div>
       </div>
-
-
-      
 
       {/* InfoBar */}
       <GameInfoBar

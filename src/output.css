@@ -201,6 +201,9 @@
   .relative {
     position: relative;
   }
+  .-top-10 {
+    top: calc(var(--spacing) * -10);
+  }
   .top-1\/2 {
     top: calc(1/2 * 100%);
   }
