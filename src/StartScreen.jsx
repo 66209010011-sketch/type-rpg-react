@@ -6,7 +6,7 @@ export default function StartScreen() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-[url(/pic/scene/startscreen.gif)] bg-no-repeat bg-cover text-white">
-      <img src="/pic/logo/logotrpg2.png" alt="" className="w-[10vw]"/>
+      <img src="/pic/logo/logotrpg2.png" alt="" className="w-[30vw]"/>
       <button 
         onClick={() => navigate("/stage-select")} 
         className="bg-[url(/pic/button480.png)] bg-no-repeat bg-contain w-[5vw] h-auto px-6 py-3 text-2xl mb-15"
