@@ -27,12 +27,13 @@ export default function StageSelect() {
         ))}
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 text-3xl font-bold">
+        เลือกภาษา<br />
         <button
           onClick={() => setLanguage((prev) => (prev === "th" ? "en" : "th"))}
-          className="px-4 py-2 bg-blue-500 rounded"
+          className="px-4 py-2 bg-blue-600 rounded mt-3"
         >
-          {language === "th" ? "ภาษาไทย" : "English"}
+          {language === "th" ? "ภาษาไทย TH" : "English EN"}
         </button>
       </div>
 

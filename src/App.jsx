@@ -85,31 +85,47 @@ export default function App() {
 
   useEffect(() => {
   const loadEnemies = async () => {
-    const qe = query(
-      collection(db, "enemies"),
-      where("difficulty", "==", difficulty),
-      orderBy("order", "asc")   // ✅ เรียงตาม field order
-    );
-    const snapshot = await getDocs(qe);
-    console.log("Snapshot docs:", snapshot.docs);
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setEnemies(data);
+    try {
+      console.log("📥 Loading enemies... difficulty =", difficulty);
 
-    if (data.length > 0) {
-      const firstEnemy = data[0];   // ✅ ตัวแรกคือ order = 1
-      setCurrentEnemy(firstEnemy);
-      setEnemyMaxHealth(firstEnemy.health);
-      setEnemyHealth(firstEnemy.health);
-      setEnemyImage(firstEnemy.image);
-      setEnemyName(firstEnemy.name);
+      const qe = query(
+        collection(db, "enemies"),
+        where("difficulty", "==", Number(difficulty)),  // ✅ บังคับเป็น number
+        orderBy("order", "asc")
+      );
+
+      const snapshot = await getDocs(qe);
+      console.log("📦 Raw snapshot size:", snapshot.size);
+
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("✅ Enemies data:", data);
+
+      setEnemies(data);
+
+      if (data.length > 0) {
+        const firstEnemy = data[0];
+        console.log("🎯 First enemy:", firstEnemy);
+
+        setCurrentEnemy(firstEnemy);
+        setEnemyMaxHealth(firstEnemy.health);
+        setEnemyHealth(firstEnemy.health);
+        setEnemyImage(firstEnemy.image);
+        setEnemyName(firstEnemy.name);
+      } else {
+        console.warn("⚠️ No enemies found for difficulty =", difficulty);
+      }
+    } catch (err) {
+      console.error("🔥 Error loading enemies:", err);
     }
   };
 
   loadEnemies();
 }, [difficulty]);
+
 
   // สลับศัตรูเมื่อ HP หมด
   useEffect(() => {
@@ -237,9 +253,26 @@ export default function App() {
       setIsMuted(audioRef.current.muted);
     }
   };
+  const getBackgroundByDifficulty = () => {
+    switch (difficulty) {
+      case 1:
+        return "/pic/scene/stage1.png";
+      case 2:
+        return "/music/medium.mp3";
+      case 3:
+        return "/music/hard.mp3";
+      case 4:
+        return "/pic/scene/stage4.gif"
+      case 5:
+        return "/pic/scene/stage5.gif"
+    }
+  };
 
   return (
-    <div className="p-4 relative">
+    <div 
+      className="p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
+    >
       {playerHit && <div className="player-hit-overlay"></div>}
 
       {/* เพลงแบ็คกราวด์ */}
@@ -260,9 +293,9 @@ export default function App() {
       {/* Header */}
       <div className="flex items-center w-full mb-4">
         <img
-          src="pic/logo/logotrpg.png"
+          src="/pic/logo/logotypingadventure.png"
           alt="logo"
-          className="object-cover w-[20vw] h-[10vw]"
+          className="object-cover w-[30vw] h-[10vw]"
         />
         <div className="flex gap-2">
           <button
