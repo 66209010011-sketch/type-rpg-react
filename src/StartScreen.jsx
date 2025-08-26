@@ -83,7 +83,7 @@ export default function StartScreen() {
       <img
         src="/pic/logo/logotypingadventure.png"
         alt="Logo"
-        className="w-[40vw] mb-10"
+        className="w-[50vw] mb-10"
       />
 
       {/* ปุ่ม Play */}
