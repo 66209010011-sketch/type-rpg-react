@@ -81,7 +81,7 @@ export default function StartScreen() {
 
       {/* โลโก้ */}
       <img
-        src="/pic/logo/logotypingadventure2.png"
+        src="/pic/logo/logotypingadventure.png"
         alt="Logo"
         className="w-[40vw] mb-10"
       />
