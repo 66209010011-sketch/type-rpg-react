@@ -1,15 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";  
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { useLocation, useNavigate } from "react-router-dom";  
+import { collection, getDocs, query, where, orderBy} from "firebase/firestore";
 import Textbox from "./components/PlayerBox";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
+import ResultPopup from "./components/ResultPopup.jsx";
 import { splitByLanguage } from "./utils/thaiSplit.js";
 import { db } from "./firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "./output.css";
 
 export default function App() {
+  const navigate = useNavigate();
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef(null);
 
@@ -23,7 +26,12 @@ export default function App() {
     difficulty: 1,
     language: "th",
   };
-
+  const calculateStats = () => {
+  const minutes = (Date.now() - startTime) / 60000;
+  const wpm = minutes > 0 ? Math.round((typedCount / 5) / minutes) : 0;
+  const accuracy = typedCount > 0 ? Math.round((correctCount / typedCount) * 100) : 0;
+  return { wpm, accuracy };
+  };
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
@@ -32,13 +40,20 @@ export default function App() {
   const [inputValue, setInputValue] = useState("");
   const [language, setLanguage] = useState(initialLanguage);
   const [wordList, setWordList] = useState([]);
-  const [enemyShake, setEnemyShake] = useState(false);
+  const [enemyShake, setEnemyShake] = useState(false); 
+  const [playerShake, setplayerShake] = useState(false); 
   const [enemyHealth, setEnemyHealth] = useState(null);
   const [enemyMaxHealth, setEnemyMaxHealth] = useState(null);
   const [enemyImage, setEnemyImage] = useState("");
   const [enemyname, setEnemyName] = useState("");
-  const playerName = "นักรบ";
+  const [playerName, setplayerName] = useState("Guest");
   const [elapsedTime, setElapsedTime] = useState("0:00");
+  
+  const [showResult, setShowResult] = useState(false);
+  const [isWin, setIsWin] = useState(false);
+  const [wpm, setWpm] = useState(0);
+  const [accuracy, setAccuracy] = useState(0);
+  const [score, setScore] = useState(0);
 
   // Effect states
   const [playerHit, setPlayerHit] = useState(false);
@@ -48,6 +63,34 @@ export default function App() {
   const [startTime, setStartTime] = useState(null);
   const [typedCount, setTypedCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+
+  useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        // สมมติ collection ของคุณชื่อ "users" และ document ID คือ user.uid
+        const userRef = collection(db, "users");
+        const q = query(userRef, where("uid", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          setplayerName(userData.displayName || "Player");
+        } else {
+          setplayerName("Player");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setplayerName("Player");
+      }
+    } else {
+      setplayerName("Guest");
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
 
   // 🔹 เลือกเพลงตาม difficulty
   const getMusicByDifficulty = () => {
@@ -63,6 +106,48 @@ export default function App() {
     }
   };
 
+  const calculateFinalScore = (wpm, accuracy, isWin) => {
+    let multiplier = 1;
+    switch (Number(difficulty)) {
+      case 1: multiplier = 1.0; break;
+      case 2: multiplier = 1.5; break;
+      case 3: multiplier = 2.0; break;
+      case 4: multiplier = 2.5; break;
+      case 5: multiplier = 3.0; break;
+      default: multiplier = 1.0;
+    }
+
+    let baseScore = wpm * accuracy * multiplier;
+    if (isWin) {
+      baseScore += 100; // ✅ bonus ผ่านด่าน
+    } else {
+      baseScore *= 0.7; // ❌ penalty แพ้
+    }
+    return Math.floor(baseScore);
+  };
+
+
+  // ✅ เมื่อชนะ
+  const handleWin = () => {
+    const { wpm, accuracy } = calculateStats();
+    const finalScore = calculateFinalScore(wpm, accuracy, true);
+    setWpm(wpm);
+    setAccuracy(accuracy);
+    setScore(finalScore);
+    setIsWin(true);
+    setShowResult(true);
+  };
+
+  // ❌ เมื่อแพ้
+  const handleLose = () => {
+    const { wpm, accuracy } = calculateStats();
+    const finalScore = calculateFinalScore(wpm, accuracy, false);
+    setWpm(wpm);
+    setAccuracy(accuracy);
+    setScore(finalScore);
+    setIsWin(false);
+    setShowResult(true);
+  };
   // โหลดคำจาก Firebase
   useEffect(() => {
     const loadWords = async () => {
@@ -144,10 +229,17 @@ export default function App() {
       setInputValue("");
     } else {
       console.log("🎉 ศัตรูหมดแล้ว เคลียร์ด่าน!");
-      // 👉 ตรงนี้คุณจะใส่ logic เช่นไปหน้าชนะเกม หรือวน loop ต่อก็ได้
+      handleWin();
     }
   }
 }, [enemyHealth, enemies, currentEnemy]);
+
+useEffect(() => {
+  if (health <= 0) {
+    console.log("💀 ผู้เล่น HP หมด แพ้เกม!");
+    handleLose(); // เรียก popup แพ้
+  }
+}, [health]);
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
 
@@ -177,10 +269,10 @@ export default function App() {
     setInputValue(text);
 
     const correctNow = newStatuses.filter((x) => x === "correct").length;
-    const accuracy = (correctNow / enemyChars.length) * 100;
+    const currentaccuracy = (correctNow / enemyChars.length) * 100;
 
     if (inputChars.length === enemyChars.length && wordList.length > 0) {
-      if (accuracy >= 75) {
+      if (currentaccuracy >= 75) {
         const damage = enemyChars.length * 1;
         setEnemyHealth((prev) => Math.max(prev - damage, 0));
         setEnemyShake(true);
@@ -190,8 +282,10 @@ export default function App() {
         playSound("/sound/enemyhit.mp3");
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
+        setplayerShake(true);
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
+        setTimeout(() => setplayerShake(false), 400);
         playSound("/sound/playerhit.wav");
       }
 
@@ -200,13 +294,6 @@ export default function App() {
       const newWord = wordList[Math.floor(Math.random() * wordList.length)];
       setEnemyWord(newWord);
     }
-  };
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "th" ? "en" : "th"));
-    setStartTime(null);
-    setTypedCount(0);
-    setCorrectCount(0);
   };
 
   const openWordManager = () => {
@@ -257,14 +344,15 @@ export default function App() {
     switch (difficulty) {
       case 1:
         return "/pic/scene/stage1.png";
-      case 2:
-        return "/music/medium.mp3";
-      case 3:
-        return "/music/hard.mp3";
+      case 2: 
+        return "/pic/scene/stage2.png";  
+      case 3: 
+        return "/pic/scene/stage3.png"; 
       case 4:
-        return "/pic/scene/stage4.gif"
+        return "/pic/scene/stage4.gif";
       case 5:
-        return "/pic/scene/stage5.gif"
+        return "/pic/scene/stage5.gif";
+      default: return "/pic/scene/default.png";
     }
   };
 
@@ -272,55 +360,81 @@ export default function App() {
     <div 
       className="p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
-    >
-      {playerHit && <div className="player-hit-overlay"></div>}
+    > 
+      {!showResult && (
+      <>
+        {playerHit && <div className="player-hit-overlay"></div>}
 
-      {/* เพลงแบ็คกราวด์ */}
-      <audio ref={audioRef} autoPlay loop>
-        <source src={getMusicByDifficulty()} type="audio/mpeg" />
-      </audio>
+        {/* เพลงแบ็คกราวด์ */}
+        <audio ref={audioRef} autoPlay loop>
+          <source src={getMusicByDifficulty()} type="audio/mpeg" />
+        </audio>
 
-      {/* ปุ่มปิด/เปิดเสียง */}
-      <button
-        onClick={toggleMute}
-        className={`fixed top-4 right-4 z-50 p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
-          isMuted ? "bg-red-500" : "bg-green-500"
-        } text-white`}
-      >
-        {isMuted ? "🔇" : "🔊"}
-      </button>
-
-      {/* Header */}
-      <div className="flex items-center w-full mb-4">
-        <img
-          src="/pic/logo/logotypingadventure.png"
-          alt="logo"
-          className="object-cover w-[30vw] h-[10vw]"
-        />
-        <div className="flex gap-2">
+        <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
+          {/* ปุ่มกลับหน้าแรก */}
           <button
-            onClick={openWordManager}
-            className="px-4 py-2 bg-green-500 text-white rounded"
+            onClick={() => {
+              const confirmExit = window.confirm("คุณต้องการกลับไปหน้าแรกจริงๆ ใช่ไหม?");
+              if (confirmExit) {
+                navigate("/");
+              }
+            }}
           >
-            จัดการคำศัพท์
+            <img
+              src="/pic/returnarrow.png"
+              alt="กลับหน้าแรก"
+              className="w-16 h-16 hover:scale-110 transition-transform"
+            />
+          </button>
+
+          {/* ปุ่มปิด/เปิดเสียง */}
+          <button
+            onClick={toggleMute}
+            className={`p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
+              isMuted ? "bg-red-500" : "bg-green-500"
+            } text-white`}
+          >
+            {isMuted ? "🔇" : "🔊"}
           </button>
         </div>
-      </div>
 
-      <div className="relative">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-          <Textbox
-            word={enemyWord}
-            typedIndexes={typedIndexes}
-            language={language}
+        {/* Header */}
+        <div className="flex fixed items-center w-full mb-4">
+          <img
+            src="/pic/logo/logotypingadventure.png"
+            alt="logo"
+            className="object-cover w-[30vw] h-[10vw]"
           />
+          <div className="flex gap-2">
+            <button
+              onClick={openWordManager}
+              className="px-4 py-2 bg-green-500 text-white rounded"
+            >
+              จัดการคำศัพท์
+            </button>
+          </div>
         </div>
-
-        <div className="flex justify-end mt-10 mr-20">
+        <div className="flex items-center justify-between mt-40 px-20">
+          {/* Player */}
           <div
-            className={`enemy-box ${
-              enemyShake ? "enemy-shake" : "enemy-float"
-            }`}
+            className={`player-box ${playerShake ? "player-shake" : "player-float"}`}
+          >
+            <div className="text-center text-3xl font-bold">{playerName}</div>
+            <img src="/pic/enemy1.png" alt="" className="w-[20vw] h-auto" />
+          </div>
+
+          {/* Textbox (กลาง) */}
+          <div className="flex justify-center items-center">
+            <Textbox
+              word={enemyWord}
+              typedIndexes={typedIndexes}
+              language={language}
+            />
+          </div>
+
+          {/* Enemy */}
+          <div
+            className={`enemy-box ${enemyShake ? "enemy-shake" : "enemy-float"}`}
           >
             <EnemyBox
               image={enemyImage}
@@ -331,21 +445,38 @@ export default function App() {
             {damageText && <div className="damage-float">{damageText}</div>}
           </div>
         </div>
-      </div>
 
-      <GameInfoBar
-        word={enemyWord}
-        typedIndexes={typedIndexes}
-        health={health}
-        playerName={playerName}
-        language={language}
-        startTime={startTime}
-        typedCount={typedCount}
-        correctCount={correctCount}
-        elapsedTime={elapsedTime}
-      />
+        <GameInfoBar
+          word={enemyWord}
+          typedIndexes={typedIndexes}
+          health={health}
+          playerName={playerName}
+          language={language}
+          startTime={startTime}
+          typedCount={typedCount}
+          correctCount={correctCount}
+          elapsedTime={elapsedTime}
+        />
 
-      <TypingBox onTyping={handleTyping} inputValue={inputValue} />
+        <TypingBox onTyping={handleTyping} inputValue={inputValue} />
+      </>
+      )}
+      
+
+      {showResult && (
+        <ResultPopup
+          isWin={isWin}
+          wpm={wpm}
+          accuracy={accuracy}
+          score={score}
+          difficulty={difficulty}
+          onClose={() => setShowResult(false)}
+          onRestart={() => window.location.reload()}
+        />
+      )}
+
+      
+      
     </div>
   );
 }

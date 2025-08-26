@@ -47,6 +47,9 @@ body {
 .enemy-shake {
   animation: shake 0.4s;
 }
+.player-shake {
+  animation: shake 0.4s;
+}
 
 @keyframes shake {
   0% { transform: translate(0, 0); }
@@ -79,4 +82,15 @@ body {
 
 .enemy-float {
   animation: float 2s ease-in-out infinite;
+}
+.player-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes scale-up {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-up {
+  animation: scale-up 0.3s forwards;
 }
