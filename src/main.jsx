@@ -7,6 +7,7 @@ import App from "./App";
 import WordManager from "./WordManager";
 import "./output.css"; // หรือ "./index.css"
 import ResultPopup from "./components/ResultPopup";
+import Leaderboard from "./components/leaderboard";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/stage-select" element={<StageSelect />} />
       <Route path="/game" element={<App />} />
       <Route path="/Result" element={<ResultPopup />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/word-manager" element={<WordManager />} />
     </Routes>
   </BrowserRouter>

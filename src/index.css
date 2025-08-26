@@ -94,3 +94,6 @@ body {
 .animate-scale-up {
   animation: scale-up 0.3s forwards;
 }
+.name{
+  font-family: "Jersey 15", sans-serif;
+}

@@ -10,7 +10,7 @@ export default function GameInfoBar({ health, playerName,  startTime, typedCount
   return (
     <div className="text-2xl text-white bg-black/50 p-6 border border-white flex justify-center items-center gap-4">
       <div className="items-center gap-4 max-w-[400px]">
-        <div className="font-bold text-3xl">{playerName}</div>
+        <div className="font-bold text-5xl name">{playerName}</div>
         <Healthbar health={health} maxhealth={100} />
         
       </div>

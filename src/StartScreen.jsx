@@ -83,19 +83,29 @@ export default function StartScreen() {
       <img
         src="/pic/logo/logotypingadventure2.png"
         alt="Logo"
-        className="w-[40vw] mb-20"
+        className="w-[40vw] mb-10"
       />
 
       {/* ปุ่ม Play */}
-      <div className="relative flex justify-center items-center mb-6">
-        <img
-          src="/pic/playbutton.png"
-          alt="Play Button"
-          className="fixed w-[15vw] h-auto object-contain transform transition-transform duration-300 hover:scale-110 "
-          onClick={() => navigate("/stage-select")}
-        />
-      </div>
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex justify-center items-center">
+          <img
+            src="/pic/playbutton.png"
+            alt="Play Button"
+            className="w-[15vw] h-auto object-contain transform transition-transform duration-300 hover:scale-110 cursor-pointer"
+            onClick={() => navigate("/stage-select")}
+          />
+        </div>
 
+        <div className="flex justify-center items-center">
+          <img
+            src="/pic/trophy.png"
+            alt="Trophy"
+            className="w-[5vw] h-auto object-contain transform transition-transform duration-300 hover:scale-110 cursor-pointer"
+            onClick={() => navigate("/leaderboard")}
+          />
+        </div>
+      </div>
 
     </div>
   );
