@@ -433,10 +433,8 @@ useEffect(() => {
           <div
             className={`player-box ${playerShake ? "player-shake" : "player-float"}`}
           >
-            <div className="text-center text-5xl font-bold text-white text-shadow-lg/30 name">
-              {playerName}
-            </div>
-            <img src="/pic/maincharactor.png" alt="" className="w-[20vw] h-auto" />
+            <div className="text-center text-5xl font-bold text-white text-shadow-lg/30 name">{playerName}</div>
+            <img src="/pic/enemy1.png" alt="" className="w-[20vw] h-auto" />
           </div>
 
 
