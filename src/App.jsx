@@ -343,11 +343,11 @@ useEffect(() => {
   const getBackgroundByDifficulty = () => {
     switch (difficulty) {
       case 1:
-        return "/pic/scene/stage1.png";
+        return "/pic/scene/stage1.gif";
       case 2: 
-        return "/pic/scene/stage2.png";  
+        return "/pic/scene/stage2.gif";  
       case 3: 
-        return "/pic/scene/stage3.png"; 
+        return "/pic/scene/stage3.gif"; 
       case 4:
         return "/pic/scene/stage4.gif";
       case 5:
