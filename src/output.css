@@ -222,12 +222,6 @@
   }
   .inset-0 {
     inset: calc(var(--spacing) * 0);
-<<<<<<< HEAD
-=======
-  }
-  .top-1 {
-    top: calc(var(--spacing) * 1);
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   }
   .top-1\/2 {
     top: calc(1/2 * 100%);
@@ -298,12 +292,6 @@
   .hidden {
     display: none;
   }
-<<<<<<< HEAD
-=======
-  .table {
-    display: table;
-  }
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
@@ -385,13 +373,10 @@
   .border-collapse {
     border-collapse: collapse;
   }
-<<<<<<< HEAD
-=======
   .-translate-y-1 {
     --tw-translate-y: calc(var(--spacing) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1/2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -636,13 +621,10 @@
     font-size: var(--text-5xl);
     line-height: var(--tw-leading, var(--text-5xl--line-height));
   }
-<<<<<<< HEAD
-=======
   .text-6xl {
     font-size: var(--text-6xl);
     line-height: var(--tw-leading, var(--text-6xl--line-height));
   }
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   .text-lg {
     font-size: var(--text-lg);
     line-height: var(--tw-leading, var(--text-lg--line-height));
@@ -703,8 +685,6 @@
     --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-<<<<<<< HEAD
-=======
   .outline {
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
@@ -712,7 +692,6 @@
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, visibility, content-visibility, overlay, pointer-events;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -745,15 +724,9 @@
     --tw-ease: var(--ease-in-out);
     transition-timing-function: var(--ease-in-out);
   }
-<<<<<<< HEAD
-  .text-shadow-lg\/30 {
-    --tw-text-shadow-alpha: 30%;
-    text-shadow: 0px 1px 2px var(--tw-text-shadow-color, oklab(from rgb(0 0 0 / 0.1) l a b / 30%)), 0px 3px 2px var(--tw-text-shadow-color, oklab(from rgb(0 0 0 / 0.1) l a b / 30%)), 0px 4px 8px var(--tw-text-shadow-color, oklab(from rgb(0 0 0 / 0.1) l a b / 30%));
-=======
   .ease-out {
     --tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);
->>>>>>> b3a23364e7c0750ea4d5d8a940153244bd105319
   }
   .hover\:scale-110 {
     &:hover {
