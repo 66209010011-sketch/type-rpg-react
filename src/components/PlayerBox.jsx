@@ -6,9 +6,9 @@ export default function Textbox({ word, language, typedIndexes}) {
   const chars = splitByLanguage(word, language, "char");
 
   return (
-    <div className="text-center bg-black/50 p-6 border rounded border-white w-[25vw]">
+    <div className="text-center bg-black/50 p-6 border rounded border-white min-w-[25vw] w-max max-w-[60vw] mx-auto">
       <p className="font-semibold text-white text-2xl mb-2">คำศัพท์:</p>
-      <p className="flex justify-center text-black font-['K2D'] text-4xl text-center">
+      <p className="flex justify-center text-black font-['K2D'] text-4xl text-center px-4 flex-nowrap">
         {chars.map((char, idx) => {
           const state = typedIndexes[idx];
           const extra =
@@ -23,6 +23,7 @@ export default function Textbox({ word, language, typedIndexes}) {
       </p>
     </div>
   );
+
 }
 
 
