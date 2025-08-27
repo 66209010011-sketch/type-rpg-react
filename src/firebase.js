@@ -1,8 +1,8 @@
 // firebase.js
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";        // ✅ import auth
-import { getFirestore } from "firebase/firestore"; // ✅ import firestore
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Config จาก Firebase Console
 const firebaseConfig = {
@@ -19,11 +19,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Analytics (ใช้ได้ถ้าเว็บเป็น HTTPS)
+// Analytics (ใช้ได้ถ้าเว็บเป็น HTTPS และเปิด GA ใน Firebase)
 const analytics = getAnalytics(app);
 
 // ✅ Initialize Auth และ Firestore
-const auth = getAuth(app);
-const db = getFirestore(app);
+export const auth = getAuth(app);
+export const provider = new GoogleAuthProvider();
+export const db = getFirestore(app);
 
-export { app, auth, db };
+// ฟังก์ชัน Login/Logout
+export const loginWithGoogle = () => signInWithPopup(auth, provider);
+export const logout = () => signOut(auth);
+
+export { app };

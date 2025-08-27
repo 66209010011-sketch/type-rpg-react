@@ -5,7 +5,6 @@ body {
   font-optical-sizing: auto;
   margin: 0;
   padding: 0;
-  background-image: url('assets/type-rpg-background.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -48,6 +47,9 @@ body {
 .enemy-shake {
   animation: shake 0.4s;
 }
+.player-shake {
+  animation: shake 0.4s;
+}
 
 @keyframes shake {
   0% { transform: translate(0, 0); }
@@ -70,4 +72,28 @@ body {
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(15px); } /* เลื่อนลง 15px */
+  100% { transform: translateY(0px); }
+}
+
+.enemy-float {
+  animation: float 2s ease-in-out infinite;
+}
+.player-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes scale-up {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-up {
+  animation: scale-up 0.3s forwards;
+}
+.name{
+  font-family: "Jersey 15", sans-serif;
 }

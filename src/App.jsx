@@ -1,26 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";  
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";  
+import { collection, getDocs, query, where, orderBy} from "firebase/firestore";
 import Textbox from "./components/PlayerBox";
 import EnemyBox from "./components/EnemyBox";
 import TypingBox from "./components/TypingBox";
 import GameInfoBar from "./components/GameInfoBar";
-import Healthbar from "./components/Healthbar";
+import ResultPopup from "./components/ResultPopup.jsx";
 import { splitByLanguage } from "./utils/thaiSplit.js";
+import { db } from "./firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "./output.css";
 
-// Firebase
-import { db } from "./firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
-
 export default function App() {
+  const navigate = useNavigate();
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+
   const playSound = (file) => {
-  const audio = new Audio(file);
-  audio.play();
+    const audio = new Audio(file);
+    audio.play();
   };
+
   const location = useLocation();
   const { difficulty, language: initialLanguage } = location.state || {
     difficulty: 1,
     language: "th",
+  };
+  const calculateStats = () => {
+  const minutes = (Date.now() - startTime) / 60000;
+  const wpm = minutes > 0 ? Math.round((typedCount / 5) / minutes) : 0;
+  const accuracy = typedCount > 0 ? Math.round((correctCount / typedCount) * 100) : 0;
+  return { wpm, accuracy };
   };
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
@@ -30,13 +40,21 @@ export default function App() {
   const [inputValue, setInputValue] = useState("");
   const [language, setLanguage] = useState(initialLanguage);
   const [wordList, setWordList] = useState([]);
-  const [enemyShake, setEnemyShake] = useState(false);
+  const [enemyShake, setEnemyShake] = useState(false); 
+  const [playerShake, setplayerShake] = useState(false); 
   const [enemyHealth, setEnemyHealth] = useState(null);
   const [enemyMaxHealth, setEnemyMaxHealth] = useState(null);
   const [enemyImage, setEnemyImage] = useState("");
   const [enemyname, setEnemyName] = useState("");
-  const playerName = "นักรบ";
+  const [playerName, setplayerName] = useState("Guest");
+  const [elapsedTime, setElapsedTime] = useState("0:00");
   
+  const [showResult, setShowResult] = useState(false);
+  const [isWin, setIsWin] = useState(false);
+  const [wpm, setWpm] = useState(0);
+  const [accuracy, setAccuracy] = useState(0);
+  const [score, setScore] = useState(0);
+
   // Effect states
   const [playerHit, setPlayerHit] = useState(false);
   const [damageText, setDamageText] = useState(null);
@@ -46,6 +64,90 @@ export default function App() {
   const [typedCount, setTypedCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
 
+  useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        // สมมติ collection ของคุณชื่อ "users" และ document ID คือ user.uid
+        const userRef = collection(db, "users");
+        const q = query(userRef, where("uid", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          setplayerName(userData.displayName || "Player");
+        } else {
+          setplayerName("Player");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setplayerName("Player");
+      }
+    } else {
+      setplayerName("Guest");
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
+
+  // 🔹 เลือกเพลงตาม difficulty
+  const getMusicByDifficulty = () => {
+    switch (difficulty) {
+      case 1:
+        return "/music/firststatesong.mp3";
+      case 2:
+        return "/music/medium.mp3";
+      case 3:
+        return "/music/hard.mp3";
+      default:
+        return "/music/easy.mp3";
+    }
+  };
+
+  const calculateFinalScore = (wpm, accuracy, isWin) => {
+    let multiplier = 1;
+    switch (Number(difficulty)) {
+      case 1: multiplier = 1.0; break;
+      case 2: multiplier = 1.5; break;
+      case 3: multiplier = 2.0; break;
+      case 4: multiplier = 2.5; break;
+      case 5: multiplier = 3.0; break;
+      default: multiplier = 1.0;
+    }
+
+    let baseScore = wpm * accuracy * multiplier;
+    if (isWin) {
+      baseScore += 100; // ✅ bonus ผ่านด่าน
+    } else {
+      baseScore *= 0.7; // ❌ penalty แพ้
+    }
+    return Math.floor(baseScore);
+  };
+
+
+  // ✅ เมื่อชนะ
+  const handleWin = () => {
+    const { wpm, accuracy } = calculateStats();
+    const finalScore = calculateFinalScore(wpm, accuracy, true);
+    setWpm(wpm);
+    setAccuracy(accuracy);
+    setScore(finalScore);
+    setIsWin(true);
+    setShowResult(true);
+  };
+
+  // ❌ เมื่อแพ้
+  const handleLose = () => {
+    const { wpm, accuracy } = calculateStats();
+    const finalScore = calculateFinalScore(wpm, accuracy, false);
+    setWpm(wpm);
+    setAccuracy(accuracy);
+    setScore(finalScore);
+    setIsWin(false);
+    setShowResult(true);
+  };
   // โหลดคำจาก Firebase
   useEffect(() => {
     const loadWords = async () => {
@@ -64,49 +166,80 @@ export default function App() {
       }
     };
     loadWords();
-  }, [language]);
+  }, [language, difficulty]);
 
   useEffect(() => {
-      const loadEnemies = async () => {
-          const qe = query(
-          collection(db, "enemies"),
-          where("difficulty", "==", difficulty)
-        );
-        const snapshot = await getDocs(qe);
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEnemies(data);
+  const loadEnemies = async () => {
+    try {
+      console.log("📥 Loading enemies... difficulty =", difficulty);
 
-        if (data.length > 0) {
-          const enemy = data[Math.floor(Math.random() * data.length)];
-          setCurrentEnemy(enemy);
-          setEnemyMaxHealth(enemy.health);
-          setEnemyHealth(enemy.health);   // ต้องเซ็ตเลือดจริงด้วย
-          setEnemyImage(enemy.image);
-          setEnemyName(enemy.name);
-        }
-      };
+      const qe = query(
+        collection(db, "enemies"),
+        where("difficulty", "==", Number(difficulty)),  // ✅ บังคับเป็น number
+        orderBy("order", "asc")
+      );
 
-      loadEnemies();
-    }, []);
+      const snapshot = await getDocs(qe);
+      console.log("📦 Raw snapshot size:", snapshot.size);
+
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("✅ Enemies data:", data);
+
+      setEnemies(data);
+
+      if (data.length > 0) {
+        const firstEnemy = data[0];
+        console.log("🎯 First enemy:", firstEnemy);
+
+        setCurrentEnemy(firstEnemy);
+        setEnemyMaxHealth(firstEnemy.health);
+        setEnemyHealth(firstEnemy.health);
+        setEnemyImage(firstEnemy.image);
+        setEnemyName(firstEnemy.name);
+      } else {
+        console.warn("⚠️ No enemies found for difficulty =", difficulty);
+      }
+    } catch (err) {
+      console.error("🔥 Error loading enemies:", err);
+    }
+  };
+
+  loadEnemies();
+}, [difficulty]);
+
 
   // สลับศัตรูเมื่อ HP หมด
-useEffect(() => {
+  useEffect(() => {
   if (enemyHealth !== null && enemyHealth <= 0 && enemies.length > 0) {
-    const newEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-    setCurrentEnemy(newEnemy);
-    setEnemyMaxHealth(newEnemy.health);
-    setEnemyHealth(newEnemy.health);  // รีเซ็ตเลือดใหม่
-    setEnemyImage(newEnemy.image);
-    setEnemyName(newEnemy.name);
-    setTypedIndexes([]);
-    setInputValue("");
+    const currentIndex = enemies.findIndex(e => e.id === currentEnemy.id);
+    const nextIndex = currentIndex + 1;
+
+    if (nextIndex < enemies.length) {
+      const nextEnemy = enemies[nextIndex];  // ✅ เลือกศัตรูถัดไปตาม order
+      setCurrentEnemy(nextEnemy);
+      setEnemyMaxHealth(nextEnemy.health);
+      setEnemyHealth(nextEnemy.health);
+      setEnemyImage(nextEnemy.image);
+      setEnemyName(nextEnemy.name);
+      setTypedIndexes([]);
+      setInputValue("");
+    } else {
+      console.log("🎉 ศัตรูหมดแล้ว เคลียร์ด่าน!");
+      handleWin();
+    }
   }
-}, [enemyHealth, enemies]);  // ✅ ใช้ enemyHealth
+}, [enemyHealth, enemies, currentEnemy]);
 
-
+useEffect(() => {
+  if (health <= 0) {
+    console.log("💀 ผู้เล่น HP หมด แพ้เกม!");
+    handleLose(); // เรียก popup แพ้
+  }
+}, [health]);
 
   const enemyChars = splitByLanguage(enemyWord, language, "char");
 
@@ -120,30 +253,27 @@ useEffect(() => {
       const status = inputChars[i] === enemyChars[i] ? "correct" : "incorrect";
       newStatuses[i] = status;
 
-      // ✅ นับจำนวนพิมพ์
       if (typedIndexes[i] !== status) {
         setTypedCount((c) => c + 1);
         if (status === "correct") {
           setCorrectCount((c) => c + 1);
           playSound("/sound/correct.wav");
-        } 
+        }
         if (status === "incorrect") {
           playSound("/sound/incorrect.wav");
         }
-      }  
+      }
     }
 
     setTypedIndexes(newStatuses);
     setInputValue(text);
 
-    // Accuracy
     const correctNow = newStatuses.filter((x) => x === "correct").length;
-    const accuracy = (correctNow / enemyChars.length) * 100;
+    const currentaccuracy = (correctNow / enemyChars.length) * 100;
 
-    // จบคำ
     if (inputChars.length === enemyChars.length && wordList.length > 0) {
-      if (accuracy >= 75) {
-        const damage = enemyChars.length * 1; // difficulty
+      if (currentaccuracy >= 75) {
+        const damage = enemyChars.length * 1;
         setEnemyHealth((prev) => Math.max(prev - damage, 0));
         setEnemyShake(true);
         setDamageText(damage);
@@ -152,12 +282,13 @@ useEffect(() => {
         playSound("/sound/enemyhit.mp3");
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
+        setplayerShake(true);
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
+        setTimeout(() => setplayerShake(false), 400);
         playSound("/sound/playerhit.wav");
       }
-      
-      // รีเซ็ตการพิมพ์
+
       setTypedIndexes([]);
       setInputValue("");
       const newWord = wordList[Math.floor(Math.random() * wordList.length)];
@@ -165,84 +296,187 @@ useEffect(() => {
     }
   };
 
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "th" ? "en" : "th"));
-    // ✅ รีเซ็ตตัวนับเมื่อเปลี่ยนภาษา
-    setStartTime(null);
-    setTypedCount(0);
-    setCorrectCount(0);
-  };
-
   const openWordManager = () => {
     window.open("/word-manager", "_blank");
   };
 
-  return (
-    <div className="p-4 relative">
-      {playerHit && <div className="player-hit-overlay"></div>}
+  // ตัวจับเวลา
+  useEffect(() => {
+    let timer;
+    if (startTime) {
+      timer = setInterval(() => {
+        const diffMs = Date.now() - startTime;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        setElapsedTime(formatted);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [startTime]);
 
-      {/* Logo + Buttons */}
-      <div className="flex items-center justify-between w-full mb-4">
-        <img
-          src="pic/logo/logotrpg.png"
-          alt="logo"
-          className="object-cover w-[20vw] h-[10vw]"
+  // จัดการเพลง
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.10;
+      audioRef.current.play().catch(() => {
+        console.log("Auto-play ถูกบล็อก ต้องให้ user กด interaction ก่อน");
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+      audioRef.current.volume = 0.10;
+      audioRef.current.play().catch(() => {});
+    }
+  }, [difficulty]);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(audioRef.current.muted);
+    }
+  };
+  const getBackgroundByDifficulty = () => {
+    switch (difficulty) {
+      case 1:
+        return "/pic/scene/stage1.png";
+      case 2: 
+        return "/pic/scene/stage2.png";  
+      case 3: 
+        return "/pic/scene/stage3.png"; 
+      case 4:
+        return "/pic/scene/stage4.gif";
+      case 5:
+        return "/pic/scene/stage5.gif";
+      default: return "/pic/scene/default.png";
+    }
+  };
+
+  return (
+    <div 
+      className="p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
+    > 
+      {!showResult && (
+      <>
+        {playerHit && <div className="player-hit-overlay"></div>}
+
+        {/* เพลงแบ็คกราวด์ */}
+        <audio ref={audioRef} autoPlay loop>
+          <source src={getMusicByDifficulty()} type="audio/mpeg" />
+        </audio>
+
+        <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
+          {/* ปุ่มกลับหน้าแรก */}
+          <button
+            onClick={() => {
+              const confirmExit = window.confirm("คุณต้องการกลับไปหน้าแรกจริงๆ ใช่ไหม?");
+              if (confirmExit) {
+                navigate("/");
+              }
+            }}
+          >
+            <img
+              src="/pic/returnarrow.png"
+              alt="กลับหน้าแรก"
+              className="w-16 h-16 hover:scale-110 transition-transform"
+            />
+          </button>
+
+          {/* ปุ่มปิด/เปิดเสียง */}
+          <button
+            onClick={toggleMute}
+            className={`p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
+              isMuted ? "bg-red-500" : "bg-green-500"
+            } text-white`}
+          >
+            {isMuted ? "🔇" : "🔊"}
+          </button>
+        </div>
+
+        {/* Header */}
+        <div className="flex fixed items-center w-full mb-4">
+          <img
+            src="/pic/logo/logotypingadventure.png"
+            alt="logo"
+            className="object-cover w-[30vw] h-[10vw]"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={openWordManager}
+              className="px-4 py-2 bg-green-500 text-white rounded"
+            >
+              จัดการคำศัพท์
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-40 px-20">
+          {/* Player */}
+          <div
+            className={`player-box ${playerShake ? "player-shake" : "player-float"}`}
+          >
+            <div className="text-center text-5xl font-bold text-white text-shadow-lg/30 name">{playerName}</div>
+            <img src="/pic/enemy1.png" alt="" className="w-[20vw] h-auto" />
+          </div>
+
+          {/* Textbox (กลาง) */}
+          <div className="flex justify-center items-center">
+            <Textbox
+              word={enemyWord}
+              typedIndexes={typedIndexes}
+              language={language}
+            />
+          </div>
+
+          {/* Enemy */}
+          <div
+            className={`enemy-box ${enemyShake ? "enemy-shake" : "enemy-float"}`}
+          >
+            <EnemyBox
+              image={enemyImage}
+              health={enemyHealth}
+              name={enemyname}
+              maxhealth={enemyMaxHealth}
+            />
+            {damageText && <div className="damage-float">{damageText}</div>}
+          </div>
+        </div>
+
+        <GameInfoBar
+          word={enemyWord}
+          typedIndexes={typedIndexes}
+          health={health}
+          playerName={playerName}
+          language={language}
+          startTime={startTime}
+          typedCount={typedCount}
+          correctCount={correctCount}
+          elapsedTime={elapsedTime}
         />
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => window.open("/options", "_blank")}
-            className="p-2 bg-gray-700 text-white rounded-full"
-          >
-            ⚙
-          </button>
-          <button
-            onClick={openWordManager}
-            className="px-4 py-2 bg-green-500 text-white rounded"
-          >
-            จัดการคำศัพท์
-          </button>
-        </div>
-      </div>
-
-      <div className="relative my-5 flex justify-center">
-        {/* EnemyBox อยู่กลาง ไม่ขยับ */}
-        <div className={`relative enemy-box ${enemyShake ? "enemy-shake" : ""}`}>
-          <EnemyBox 
-            image={enemyImage} 
-            health={enemyHealth} 
-            name={enemyname} 
-            maxhealth={enemyMaxHealth}
-          />
-          {damageText && <div className="damage-float">{damageText}</div>}
-        </div>
-
-        {/* Textbox ชิดขวาสุดแบบ absolute */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2">
-          <Textbox 
-            word={enemyWord}
-            typedIndexes={typedIndexes}
-            language={language}
-          />
-        </div>
-      </div>
-
-
+        <TypingBox onTyping={handleTyping} inputValue={inputValue} />
+      </>
+      )}
       
 
-      {/* InfoBar */}
-      <GameInfoBar
-        word={enemyWord}
-        typedIndexes={typedIndexes}
-        health={health}
-        playerName={playerName}
-        language={language}
-        startTime={startTime}
-        typedCount={typedCount}
-        correctCount={correctCount}
-      />
+      {showResult && (
+        <ResultPopup
+          isWin={isWin}
+          wpm={wpm}
+          accuracy={accuracy}
+          score={score}
+          difficulty={difficulty}
+          onClose={() => setShowResult(false)}
+          onRestart={() => window.location.reload()}
+        />
+      )}
 
-      <TypingBox onTyping={handleTyping} inputValue={inputValue} />
+      
+      
     </div>
   );
 }
