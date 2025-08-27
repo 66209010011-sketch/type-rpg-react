@@ -27,11 +27,19 @@ export default function App() {
     language: "th",
   };
   const calculateStats = () => {
+  if (!startTime) {
+    return { wpm: 0, accuracy: 0 }; // ยังไม่เริ่มเล่น = สถิติเป็น 0
+  }
+
   const minutes = (Date.now() - startTime) / 60000;
-  const wpm = minutes > 0 ? Math.round((typedCount / 5) / minutes) : 0;
-  const accuracy = typedCount > 0 ? Math.round((correctCount / typedCount) * 100) : 0;
+  const safeMinutes = minutes > 0 ? minutes : 1; // กันหาร 0
+
+  const wpm = Math.round((typedCount / 5) / safeMinutes);
+  const accuracy =
+    typedCount > 0 ? Math.round((correctCount / typedCount) * 100) : 0;
+
   return { wpm, accuracy };
-  };
+};
   const [enemies, setEnemies] = useState([]);
   const [currentEnemy, setCurrentEnemy] = useState(null);
   const [enemyWord, setEnemyWord] = useState("");
@@ -269,7 +277,11 @@ useEffect(() => {
     setInputValue(text);
 
     const correctNow = newStatuses.filter((x) => x === "correct").length;
-    const currentaccuracy = (correctNow / enemyChars.length) * 100;
+    const currentaccuracy = 
+    enemyChars.length > 0
+    ? (correctNow / enemyChars.length) * 100
+    : 0;
+
 
     if (inputChars.length === enemyChars.length && wordList.length > 0) {
       if (currentaccuracy >= 75) {
@@ -343,11 +355,11 @@ useEffect(() => {
   const getBackgroundByDifficulty = () => {
     switch (difficulty) {
       case 1:
-        return "/pic/scene/stage1.png";
+        return "/pic/scene/stage1.gif";
       case 2: 
-        return "/pic/scene/stage2.png";  
+        return "/pic/scene/stage2.gif";  
       case 3: 
-        return "/pic/scene/stage3.png"; 
+        return "/pic/scene/stage3.gif"; 
       case 4:
         return "/pic/scene/stage4.gif";
       case 5:
@@ -405,6 +417,7 @@ useEffect(() => {
             alt="logo"
             className="object-cover w-[30vw] h-[10vw]"
           />
+          {/*
           <div className="flex gap-2">
             <button
               onClick={openWordManager}
@@ -413,15 +426,19 @@ useEffect(() => {
               จัดการคำศัพท์
             </button>
           </div>
+          */}
         </div>
         <div className="flex items-center justify-between mt-40 px-20">
           {/* Player */}
           <div
             className={`player-box ${playerShake ? "player-shake" : "player-float"}`}
           >
-            <div className="text-center text-5xl font-bold name">{playerName}</div>
-            <img src="/pic/enemy1.png" alt="" className="w-[20vw] h-auto" />
+            <div className="text-center text-5xl font-bold text-white text-shadow-lg/30 name">
+              {playerName}
+            </div>
+            <img src="/pic/maincharactor.png" alt="" className="w-[20vw] h-auto" />
           </div>
+
 
           {/* Textbox (กลาง) */}
           <div className="flex justify-center items-center">

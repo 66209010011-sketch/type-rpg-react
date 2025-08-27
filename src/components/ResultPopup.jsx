@@ -66,7 +66,7 @@ const ResultPopup = ({ isWin, wpm, accuracy, score, difficulty, onClose, onResta
             onClick={() => navigate("/stage-select")} 
             className="px-4 py-2 bg-green-500 text-white rounded-xl shadow hover:bg-green-600 transition"
           >
-            Stage Select
+            เลือกด่าน
           </button>
           <button 
             onClick={onRestart} 
