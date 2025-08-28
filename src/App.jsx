@@ -369,56 +369,22 @@ useEffect(() => {
   };
 
   return (
-    <div 
-      className="p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
-    > 
-      {!showResult && (
-      <>
-        {playerHit && <div className="player-hit-overlay"></div>}
+  <div 
+  className="p-2 sm:p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
+> 
+  {!showResult && (
+    <>
+      {playerHit && <div className="player-hit-overlay"></div>}
 
-        {/* เพลงแบ็คกราวด์ */}
-        <audio ref={audioRef} autoPlay loop>
-          <source src={getMusicByDifficulty()} type="audio/mpeg" />
-        </audio>
+      {/* เพลงแบ็คกราวด์ */}
+      <audio ref={audioRef} autoPlay loop>
+        <source src={getMusicByDifficulty()} type="audio/mpeg" />
+      </audio>
 
-        <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
-          {/* ปุ่มกลับหน้าแรก */}
-          <button
-            onClick={() => {
-              const confirmExit = window.confirm("คุณต้องการกลับไปหน้าแรกจริงๆ ใช่ไหม?");
-              if (confirmExit) {
-                navigate("/");
-              }
-            }}
-          >
-            <img
-              src="/pic/returnarrow.png"
-              alt="กลับหน้าแรก"
-              className="w-16 h-16 hover:scale-110 transition-transform"
-            />
-          </button>
-
-          {/* ปุ่มปิด/เปิดเสียง */}
-          <button
-            onClick={toggleMute}
-            className={`p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
-              isMuted ? "bg-red-500" : "bg-green-500"
-            } text-white`}
-          >
-            {isMuted ? "🔇" : "🔊"}
-          </button>
-        </div>
-
-        {/* Header */}
-        <div className="flex fixed items-center w-full mb-4">
-          <img
-            src="/pic/logo/logotypingadventure.png"
-            alt="logo"
-            className="object-cover w-[30vw] h-[10vw]"
-          />
-          {/*
-          <div className="flex gap-2">
+      {/* ปุ่มมุมขวาบน */}
+      <div className="fixed top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3 z-50">
+        <div className="flex gap-2">
             <button
               onClick={openWordManager}
               className="px-4 py-2 bg-green-500 text-white rounded"
@@ -426,42 +392,76 @@ useEffect(() => {
               จัดการคำศัพท์
             </button>
           </div>
-          */}
+        {/* ปุ่มกลับหน้าแรก */}
+        <button
+          onClick={() => {
+            const confirmExit = window.confirm("คุณต้องการกลับไปหน้าแรกจริงๆ ใช่ไหม?");
+            if (confirmExit) {
+              navigate("/");
+            }
+          }}
+        >
+          <img
+            src="/pic/returnarrow.png"
+            alt="กลับหน้าแรก"
+            className="w-10 sm:w-12 md:w-16 h-auto bg-black/20 hover:bg-white/40 backdrop-blur-md rounded-full p-2 shadow-lg transition-transform"
+          />
+        </button>
+
+        {/* ปุ่มปิด/เปิดเสียง */}
+        <button
+          onClick={toggleMute}
+          className={`p-2 sm:p-3 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-110 ${
+            isMuted ? "bg-red-500" : "bg-green-500"
+          } text-white text-sm sm:text-base md:text-lg`}
+        >
+          {isMuted ? "🔇" : "🔊"}
+        </button>
+      </div>
+
+      {/* Header */}
+      <div className="flex fixed items-center w-full justify-center mt-2 sm:mt-4">
+        <img
+          src="/pic/logo/logotypingadventure.png"
+          alt="logo"
+          className="object-contain w-[70vw] sm:w-[50vw] md:w-[30vw] h-auto"
+        />
+      </div>
+
+      {/* Player - Textbox - Enemy */}
+      <div className="flex items-center justify-between mt-32 sm:mt-36 md:mt-40 px-2 sm:px-10 md:px-20">
+        
+        {/* Player */}
+        <div className={`player-box ${playerShake ? "player-shake" : "player-float"} flex flex-col items-center`}>
+          <div className="text-center text-lg sm:text-2xl md:text-4xl font-bold text-white text-shadow-lg/30 mb-2 name">
+            {playerName}
+          </div>
+          <img src="/pic/maincharactor.png" alt="" className="w-[35vw] sm:w-[25vw] md:w-[20vw] h-auto " />
         </div>
-        <div className="flex items-center justify-between mt-40 px-20">
-          {/* Player */}
-          <div
-            className={`player-box ${playerShake ? "player-shake" : "player-float"}`}
-          >
-            <div className="text-center text-5xl font-bold text-white text-shadow-lg/30 name mb-2">
-              {playerName}
-            </div>
-            <img src="/pic/maincharactor.png" alt="" className="w-[20vw] h-auto" />
-          </div>
 
-          {/* Textbox (กลาง) */}
-          <div className="flex justify-center items-center">
-            <Textbox
-              word={enemyWord}
-              typedIndexes={typedIndexes}
-              language={language}
-            />
-          </div>
-
-          {/* Enemy */}
-          <div
-            className={`enemy-box ${enemyShake ? "enemy-shake" : "enemy-float"}`}
-          >
-            <EnemyBox
-              image={enemyImage}
-              health={enemyHealth}
-              name={enemyname}
-              maxhealth={enemyMaxHealth}
-            />
-            {damageText && <div className="damage-float">{damageText}</div>}
-          </div>
+        {/* Textbox */}
+        <div className="flex justify-center items-center max-w-[80vw] sm:max-w-[60vw] md:max-w-[40vw]">
+          <Textbox
+            word={enemyWord}
+            typedIndexes={typedIndexes}
+            language={language}
+          />
         </div>
 
+        {/* Enemy */}
+        <div className={`enemy-box ${enemyShake ? "enemy-shake" : "enemy-float"} flex justify-center`}>
+          <EnemyBox
+            image={enemyImage}
+            health={enemyHealth}
+            name={enemyname}
+            maxhealth={enemyMaxHealth}
+          />
+          {damageText && <div className="damage-float">{damageText}</div>}
+        </div>
+      </div>
+
+      {/* Game Info Bar */}
+      <div className="w-full px-2 sm:px-6 md:px-10 mt-4">
         <GameInfoBar
           word={enemyWord}
           typedIndexes={typedIndexes}
@@ -473,26 +473,30 @@ useEffect(() => {
           correctCount={correctCount}
           elapsedTime={elapsedTime}
         />
+      </div>
 
+      {/* Typing Box */}
+      <div className="w-full flex justify-center mt-4 px-2 sm:px-6 md:px-10">
         <TypingBox onTyping={handleTyping} inputValue={inputValue} />
-      </>
-      )}
-      
+      </div>
+    </>
+  )}
 
-      {showResult && (
-        <ResultPopup
-          isWin={isWin}
-          wpm={wpm}
-          accuracy={accuracy}
-          score={score}
-          difficulty={difficulty}
-          onClose={() => setShowResult(false)}
-          onRestart={() => window.location.reload()}
-        />
-      )}
+  {showResult && (
+    <ResultPopup
+      isWin={isWin}
+      wpm={wpm}
+      accuracy={accuracy}
+      score={score}
+      difficulty={difficulty}
+      typedCount={typedCount}      
+      correctCount={correctCount}
+      onClose={() => setShowResult(false)}
+      onRestart={() => window.location.reload()}
+    />
+  )}
+</div>
 
-      
-      
-    </div>
+
   );
 }

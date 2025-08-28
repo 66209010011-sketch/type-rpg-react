@@ -97,3 +97,22 @@ body {
 .name{
   font-family: "Jersey 15", sans-serif;
 }
+@keyframes floatTitle {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(10px) rotate(2deg);
+  }
+  50% {
+    transform: translateX(0) rotate(0deg);
+  }
+  75% {
+    transform: translateX(-10px) rotate(-2deg);
+  }
+}
+
+.leaderboard-title {
+  animation: floatTitle 4s ease-in-out infinite;
+  display: inline-block; /* เพื่อให้หมุน/ขยับไม่กระทบ layout */
+}
