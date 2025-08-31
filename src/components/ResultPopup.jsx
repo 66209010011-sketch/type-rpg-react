@@ -49,6 +49,17 @@ const ResultPopup = ({ isWin, wpm, accuracy, score, difficulty, onClose, onResta
     saveScore();
   }, [score, wpm, accuracy, difficulty]);
 
+  useEffect(() => {
+    let sound;
+    if (isWin) {
+      sound = new Audio("/music/win.ogg");   // 🔊 เสียงชนะ
+    } else {
+      sound = new Audio("/music/lose.ogg");  // 🔊 เสียงแพ้
+    }
+    sound.volume = 0.1;
+    sound.play().catch(() => {});
+  }, [isWin]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-[400px] text-center scale-100 transition transform duration-300">

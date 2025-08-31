@@ -16,9 +16,10 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef(null);
 
-  const playSound = (file) => {
+  const playSound = (file, volume = 0.5) => {
     const audio = new Audio(file);
-    audio.play();
+    audio.volume = volume;
+    audio.play().catch(() => {});
   };
 
   const location = useLocation();
@@ -106,8 +107,12 @@ export default function App() {
       case 1:
         return "/music/firststatesong.mp3";
       case 2:
-        return "/music/medium.mp3";
+        return "/music/secondstage.ogg";
       case 3:
+        return "/music/thirdstage.ogg";
+      case 4:
+        return "/music/forthstage.ogg";
+      case 5:
         return "/music/hard.mp3";
       default:
         return "/music/easy.mp3";
@@ -265,7 +270,7 @@ useEffect(() => {
         setTypedCount((c) => c + 1);
         if (status === "correct") {
           setCorrectCount((c) => c + 1);
-          playSound("/sound/correct.wav");
+          playSound("/sound/correct.wav", 0.10);
         }
         if (status === "incorrect") {
           playSound("/sound/incorrect.wav");
@@ -331,7 +336,7 @@ useEffect(() => {
   // จัดการเพลง
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.10;
+      audioRef.current.volume = 0.05;
       audioRef.current.play().catch(() => {
         console.log("Auto-play ถูกบล็อก ต้องให้ user กด interaction ก่อน");
       });
@@ -341,7 +346,7 @@ useEffect(() => {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.load();
-      audioRef.current.volume = 0.10;
+      audioRef.current.volume = 0.05;
       audioRef.current.play().catch(() => {});
     }
   }, [difficulty]);
@@ -369,10 +374,9 @@ useEffect(() => {
   };
 
   return (
-  <div 
-  className="p-2 sm:p-4 relative min-h-screen bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}
-> 
+  <div className="fixed inset-0 bg-cover bg-center bg-no-repeat w-screen h-screen"
+     style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}>
+
   {!showResult && (
     <>
       {playerHit && <div className="player-hit-overlay"></div>}
@@ -389,7 +393,8 @@ useEffect(() => {
             >
               จัดการคำศัพท์
             </button>
-          </div>*/}
+      </div>*/}
+      
       <div className="fixed top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3 z-50">
         
         {/* ปุ่มกลับหน้าแรก */}
