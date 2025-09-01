@@ -101,6 +101,20 @@ export default function App() {
   return () => unsubscribe();
 }, []);
 
+
+const [showInfo, setShowInfo] = useState(() => localStorage.getItem("infoSeen") !== "1");
+const [dontShowAgain, setDontShowAgain] = useState(false);
+
+const closeInfo = () => {
+  if (dontShowAgain) {
+    localStorage.setItem("infoSeen", "1"); // ✅ บันทึกตอนกดเริ่มเล่นเท่านั้น
+  }
+  setShowInfo(false);
+};
+
+
+
+
   // 🔹 เลือกเพลงตาม difficulty
   const getMusicByDifficulty = () => {
     switch (difficulty) {
@@ -376,7 +390,83 @@ useEffect(() => {
   return (
   <div className="fixed inset-0 bg-cover bg-center bg-no-repeat w-screen h-screen"
      style={{ backgroundImage: `url(${getBackgroundByDifficulty()})` }}>
+  {showInfo && (
+  <div
+    className="fixed inset-0 z-[999] flex items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+  >
+    {/* backdrop (คลิกที่นี่เพื่อปิด) */}
+    <span
+      className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      onClick={closeInfo}
+      aria-hidden="true"
+    />
 
+    {/* กล่องเนื้อหา (หยุดการแพร่ของคลิก) */}
+    <div
+      className="relative w-[90vw] max-w-[600px] bg-white/95 rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 animate-[popin_200ms_ease-out]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* ปุ่ม X ปิด */}
+      <button
+        onClick={closeInfo}
+        aria-label="Close"
+        title="ปิด"
+        className="absolute -top-3 -right-3 sm:top-2 sm:right-2 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:scale-105 transition"
+      >
+        <img src="/pic/cross.png" alt="ปิด" className="w-6 h-6" />
+      </button>
+
+      {/* หัวข้อ */}
+      <div className="flex items-center gap-3 mb-3">
+        <h3 className="text-xl sm:text-2xl font-bold text-center">📚 คู่มือเริ่มต้นอย่างรวดเร็ว</h3>
+      </div>
+
+      {/* เนื้อหา */}
+      <ul className="text-sm sm:text-base leading-relaxed text-gray-700 space-y-2">
+        <li>• พิมพ์คำให้ตรงกับคำที่ปรากฏเพื่อโจมตีศัตรู</li>
+        <li>• พิมพ์ถูก ≥ 75% ของคำจึงถือว่าผ่านและสร้างดาเมจ</li>
+        <li>• คะแนนคำนวณจาก WPM × Accuracy × ตัวคูณตามด่าน</li>
+        <li>• ปุ่มมุมขวาบน: ปิด/เปิดเสียง และ กลับหน้าแรก</li>
+        <li>• สถิติ (WPM, Accuracy, Score) จะถูกบันทึกหลังจบด่าน</li>
+      </ul>
+
+      <div className="flex items-center gap-3 mb-3 mt-4">
+        <h3 className="text-xl sm:text-2xl font-bold text-center">⌨ การวางมือแบบแป้นเหย้า</h3>
+      </div>
+      <img src="/pic/key.jpg" alt="การวางมือ" className="mx-auto mb-4 max-h-[40vh] object-contain" />
+
+      {/* Checkbox */}
+      <label className="flex items-center gap-2 mb-4 text-gray-600 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={dontShowAgain}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            setDontShowAgain(checked);
+            if (checked) {
+              localStorage.setItem("infoSeen", "1"); // เก็บทันที
+              setShowInfo(false); // ปิดทันที
+            }
+          }}
+          className="w-4 h-4 accent-purple-600"
+        />
+        <span className="text-sm">ไม่ต้องแสดงอีก</span>
+      </label>
+
+      {/* ปุ่มเริ่ม */}
+      <div className="mt-5 flex items-center justify-center gap-3">
+        <button
+          onClick={closeInfo}
+          className="px-5 py-2.5 rounded-xl bg-purple-700 text-white font-semibold shadow hover:bg-purple-800 active:scale-95 transition"
+        >
+          เข้าใจแล้ว เริ่มเล่น!
+        </button>
+      </div>
+    </div>
+  </div>
+)}
   {!showResult && (
     <>
       {playerHit && <div className="player-hit-overlay"></div>}

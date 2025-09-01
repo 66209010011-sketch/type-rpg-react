@@ -116,3 +116,8 @@ body {
   animation: floatTitle 4s ease-in-out infinite;
   display: inline-block; /* เพื่อให้หมุน/ขยับไม่กระทบ layout */
 }
+
+@keyframes popin {
+  0% { transform: scale(0.96); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
