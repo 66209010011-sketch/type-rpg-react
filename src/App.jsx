@@ -101,6 +101,21 @@ export default function App() {
   return () => unsubscribe();
 }, []);
 
+const [currentLang, setCurrentLang] = useState("EN");
+
+useEffect(() => {
+  const handleKeyPress = (e) => {
+    const char = e.key;
+    if (/[\u0E00-\u0E7F]/.test(char)) {
+      setCurrentLang("TH");
+    } else if (/[A-Za-z]/.test(char)) {
+      setCurrentLang("EN");
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyPress);
+  return () => window.removeEventListener("keydown", handleKeyPress);
+}, []);
 
 const [showInfo, setShowInfo] = useState(() => localStorage.getItem("infoSeen") !== "1");
 const [dontShowAgain, setDontShowAgain] = useState(false);
@@ -112,6 +127,47 @@ const closeInfo = () => {
   setShowInfo(false);
 };
 
+const AFK_TIMEOUT = 2 * 60 * 1000; // 2 นาที = 120,000 ms
+
+useEffect(() => {
+  let timer;
+
+  const resetTimer = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      console.log("⏰ AFK detected! Resetting game...");
+
+      // รีเซ็ตเกม
+      setHealth(100);
+      setEnemyHealth(enemyMaxHealth);
+      setTypedIndexes([]);
+      setInputValue("");
+      setStartTime(null);
+      setTypedCount(0);
+      setCorrectCount(0);
+
+      // โชว์คู่มืออีกครั้ง
+      setShowInfo(true);
+    }, AFK_TIMEOUT);
+  };
+
+  // ฟังก์ชันที่ถือว่ามีการใช้งาน
+  const activityEvents = ["mousemove", "keydown", "click", "touchstart"];
+
+  activityEvents.forEach((event) =>
+    window.addEventListener(event, resetTimer)
+  );
+
+  // เริ่มจับตั้งแต่แรก
+  resetTimer();
+
+  return () => {
+    clearTimeout(timer);
+    activityEvents.forEach((event) =>
+      window.removeEventListener(event, resetTimer)
+    );
+  };
+}, [enemyMaxHealth]);
 
 
 
@@ -567,6 +623,7 @@ useEffect(() => {
           typedCount={typedCount}
           correctCount={correctCount}
           elapsedTime={elapsedTime}
+          currentLang={currentLang} 
         />
       </div>
 
