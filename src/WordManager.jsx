@@ -1,230 +1,614 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { db } from "./firebase";
 import {
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
   doc,
-  query,
-  where,
+  updateDoc,
+  onSnapshot,
 } from "firebase/firestore";
 
 export default function WordManager() {
+  const [tab, setTab] = useState("words");
+
   const [words, setWords] = useState([]);
-  const [newWord, setNewWord] = useState("");
-  const [meaning, setMeaning] = useState("");
-  const [language, setLanguage] = useState("TH");
-  const [difficulty, setDifficulty] = useState(1);
-
   const [enemies, setEnemies] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  // โหลด words
-  const loadWords = async () => {
-    const snapshot = await getDocs(collection(db, "words"));
-    setWords(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  };
+  // filter
+  const [wordFilter, setWordFilter] = useState("");
+  const [enemyFilter, setEnemyFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("");
 
-  // โหลด enemies
-  const loadEnemies = async () => {
-    const snapshot = await getDocs(collection(db, "enemies"));
-    setEnemies(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  };
+  // form state
+  const [newWord, setNewWord] = useState("");
+  const [newMeaning, setNewMeaning] = useState("");
+  const [newLanguage, setNewLanguage] = useState("TH");
+  const [newDifficulty, setNewDifficulty] = useState(1);
 
-  useEffect(() => {
-    loadWords();
-    loadEnemies();
+  const [newEnemy, setNewEnemy] = useState({
+    name: "",
+    image: "",
+    health: 100,
+    difficulty: 1,
+  });
+
+  const [newUser, setNewUser] = useState({
+    displayName: "",
+    email: "",
+  });
+
+  // editing state
+  const [editingWord, setEditingWord] = useState(null);
+  const [editingEnemy, setEditingEnemy] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const editRef = useRef(null);
+  const topRef = useRef(null);
+
+ const scrollContainerRef = useRef(null);
+
+useEffect(() => {
+  const handleScroll = () => {
+      if (scrollContainerRef.current.scrollTop > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    const el = scrollContainerRef.current;
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // เพิ่มคำ
-  const addWord = async () => {
-    if (!newWord.trim() || !meaning.trim())
-      return alert("กรุณากรอกข้อมูลให้ครบ");
-
-    const q = query(
-      collection(db, "words"),
-      where("word", "==", newWord),
-      where("language", "==", language)
-    );
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      alert("❌ คำนี้มีอยู่แล้วในฐานข้อมูล");
-      return;
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
 
+  const importWordsFromJSON = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    try {
+      const data = JSON.parse(text);
+      if (!Array.isArray(data)) return alert("ไฟล์ JSON ต้องเป็น Array");
+
+      for (let item of data) {
+        if (item.word && item.meaning) {
+          await addDoc(collection(db, "words"), {
+            word: item.word,
+            meaning: item.meaning,
+            language: item.language || "TH",
+            difficulty: Number(item.difficulty) || 1,
+          });
+        }
+      }
+      alert("นำเข้าไฟล์ JSON สำเร็จ");
+    } catch (err) {
+      alert("ไฟล์ JSON ไม่ถูกต้อง");
+    }
+  };
+
+  // subscribe realtime
+  useEffect(() => {
+    const unsubWords = onSnapshot(collection(db, "words"), (snap) =>
+      setWords(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+    const unsubEnemies = onSnapshot(collection(db, "enemies"), (snap) =>
+      setEnemies(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+    const unsubUsers = onSnapshot(collection(db, "users"), (snap) =>
+      setUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+
+    return () => {
+      unsubWords();
+      unsubEnemies();
+      unsubUsers();
+    };
+  }, []);
+
+  // add
+  const addWord = async () => {
+    if (!newWord || !newMeaning) return alert("กรอกข้อมูลให้ครบ");
     await addDoc(collection(db, "words"), {
       word: newWord,
-      meaning,
-      language,
-      difficulty: Number(difficulty),
+      meaning: newMeaning,
+      language: newLanguage,
+      difficulty: Number(newDifficulty),
     });
-
     setNewWord("");
-    setMeaning("");
-    setDifficulty(1);
-    await loadWords();
+    setNewMeaning("");
+    setNewLanguage("TH");
+    setNewDifficulty(1);
   };
 
-  // ลบคำ
-  const deleteWord = async (id) => {
-    await deleteDoc(doc(db, "words", id));
-    await loadWords();
+  const addEnemy = async () => {
+    if (!newEnemy.name) return alert("กรุณากรอกชื่อศัตรู");
+    await addDoc(collection(db, "enemies"), {
+      ...newEnemy,
+      health: Number(newEnemy.health),
+      difficulty: Number(newEnemy.difficulty),
+    });
+    setNewEnemy({ name: "", image: "", health: 100, difficulty: 1 });
   };
 
-  // Import words.json
-  const handleImportWords = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      const jsonWords = JSON.parse(text);
-      let added = 0, skipped = 0;
-
-      for (const word of jsonWords) {
-        const q = query(
-          collection(db, "words"),
-          where("word", "==", word.word),
-          where("language", "==", word.language)
-        );
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          await addDoc(collection(db, "words"), word);
-          added++;
-        } else skipped++;
-      }
-
-      alert(`✅ Import เสร็จแล้ว (เพิ่มใหม่: ${added} | ข้ามซ้ำ: ${skipped})`);
-      await loadWords();
-    } catch (err) {
-      console.error("Import words error:", err);
-    }
+  const addUser = async () => {
+    if (!newUser.displayName || !newUser.email)
+      return alert("กรอกข้อมูลผู้ใช้ให้ครบ");
+    await addDoc(collection(db, "users"), {
+      displayName: newUser.displayName,
+      email: newUser.email,
+      progress: {},
+    });
+    setNewUser({ displayName: "", email: "" });
   };
 
-  // Import enemy.json
-  const handleImportEnemies = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  // delete
+  const deleteWord = async (id) => await deleteDoc(doc(db, "words", id));
+  const deleteEnemy = async (id) => await deleteDoc(doc(db, "enemies", id));
+  const deleteUser = async (id) => await deleteDoc(doc(db, "users", id));
 
-    try {
-      const text = await file.text();
-      const jsonEnemies = JSON.parse(text);
-      let added = 0, skipped = 0;
-
-      for (const enemy of jsonEnemies) {
-        const q = query(
-          collection(db, "enemies"),
-          where("name", "==", enemy.name)
-        );
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          await addDoc(collection(db, "enemies"), enemy);
-          added++;
-        } else skipped++;
-      }
-
-      alert(`✅ Import Enemy เสร็จแล้ว (เพิ่มใหม่: ${added} | ข้ามซ้ำ: ${skipped})`);
-      await loadEnemies();
-    } catch (err) {
-      console.error("Import enemies error:", err);
-    }
+  // update
+  const updateWord = async () => {
+    await updateDoc(doc(db, "words", editingWord.id), {
+      word: editingWord.word,
+      meaning: editingWord.meaning,
+      language: editingWord.language,
+      difficulty: Number(editingWord.difficulty),
+    });
+    setEditingWord(null);
   };
 
-  // ลบทุกคำศัพท์
-const clearAllWords = async () => {
-  if (!window.confirm("⚠️ ต้องการลบทุกคำศัพท์ในฐานข้อมูลหรือไม่?")) return;
+  const updateEnemy = async () => {
+    await updateDoc(doc(db, "enemies", editingEnemy.id), {
+      name: editingEnemy.name,
+      image: editingEnemy.image,
+      health: Number(editingEnemy.health),
+      difficulty: Number(editingEnemy.difficulty),
+    });
+    setEditingEnemy(null);
+  };
 
-  const snapshot = await getDocs(collection(db, "words"));
-  const batchDelete = snapshot.docs.map((d) => deleteDoc(doc(db, "words", d.id)));
+  const updateUser = async () => {
+    await updateDoc(doc(db, "users", editingUser.id), {
+      displayName: editingUser.displayName,
+      email: editingUser.email,
+    });
+    setEditingUser(null);
+  };
 
-  await Promise.all(batchDelete);
-  alert("✅ ลบคำศัพท์ทั้งหมดเรียบร้อยแล้ว");
-  await loadWords();
-};
+  // scroll to edit
+  const handleEdit = (setEditing, data) => {
+    setEditing(data);
+    setTimeout(() => {
+      editRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 200);
+  };
+
   return (
-    <div className="p-6 bg-white">
-      <h1 className="text-xl font-bold mb-4">Word & Enemy Manager</h1>
-
-      {/* Import buttons */}
-      <div className="flex gap-2 mb-4">
-        {/* Words */}
-        <label className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer">
-          📂 Import Words JSON
-          <input type="file" accept=".json" className="hidden" onChange={handleImportWords} />
-        </label>
-
-        {/* Enemies */}
-        <label className="px-4 py-2 bg-purple-500 text-white rounded cursor-pointer">
-          🐉 Import Enemies JSON
-          <input type="file" accept=".json" className="hidden" onChange={handleImportEnemies} />
-        </label>
+    <div ref={scrollContainerRef} className="p-6 bg-white h-screen overflow-auto">
+      <h1 className="text-xl font-bold mb-4">ระบบการจัดการ Typing Adventure (Admin Manager)</h1>
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center 
+                     bg-blue-600 text-white rounded-full shadow-xl hover:bg-blue-800 transition"
+        >
+          ⬆
+        </button>
+      )}
+      {/* Tabs */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setTab("words")}
+          className={`px-4 py-2 rounded ${
+            tab === "words" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          📖 Words
+        </button>
+        <button
+          onClick={() => setTab("enemies")}
+          className={`px-4 py-2 rounded ${
+            tab === "enemies" ? "bg-purple-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          👾 Enemies
+        </button>
+        <button
+          onClick={() => setTab("users")}
+          className={`px-4 py-2 rounded ${
+            tab === "users" ? "bg-green-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          👤 Users
+        </button>
       </div>
-      {/* ปุ่ม Clear All */}
-      <button
-        onClick={clearAllWords}
-        className="bg-red-600 text-white px-4 py-2 rounded"
-      >
-        🗑️ เคลียร์ทุกคำศัพท์
-      </button>
 
+      {/* === Words === */}
+      {tab === "words" && (
+        <div>
+          <input
+            type="text"
+            placeholder="ค้นหา Word..."
+            value={wordFilter}
+            onChange={(e) => setWordFilter(e.target.value)}
+            className="border p-2 mb-4 w-full"
+          />
+          {/* Add */}
+          <div className="mb-4 p-4 border rounded bg-gray-100">
+            <h3 className="font-bold mb-2">➕ เพิ่ม Word</h3>
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Word"
+              value={newWord}
+              onChange={(e) => setNewWord(e.target.value)}
+            />
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Meaning"
+              value={newMeaning}
+              onChange={(e) => setNewMeaning(e.target.value)}
+            />
+            <select
+              className="border p-2 w-full mb-2"
+              value={newLanguage}
+              onChange={(e) => setNewLanguage(e.target.value)}
+            >
+              <option value="TH">ไทย</option>
+              <option value="EN">อังกฤษ</option>
+            </select>
+            <input
+              className="border p-2 w-full mb-2"
+              type="number"
+              value={newDifficulty}
+              onChange={(e) => setNewDifficulty(e.target.value)}
+            />
+            <button
+              onClick={addWord}
+              className="bg-blue-500 text-white px-4 py-2 rounded mr-5"
+            >
+              บันทึก
+            </button>
+            <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+                📂Import JSON
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importWordsFromJSON}
+                  className="hidden"
+                />
+            </label>
+          </div>
+          
+          {/* Table */}
+          <table className="border w-full">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border px-2">Word</th>
+                <th className="border px-2">Meaning</th>
+                <th className="border px-2">Lang</th>
+                <th className="border px-2">Diff</th>
+                <th className="border px-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {words
+                .filter((w) =>
+                  w.word.toLowerCase().includes(wordFilter.toLowerCase())
+                )
+                .map((w) => (
+                  <tr key={w.id}>
+                    <td className="border px-2">{w.word}</td>
+                    <td className="border px-2">{w.meaning}</td>
+                    <td className="border px-2">{w.language}</td>
+                    <td className="border px-2">{w.difficulty}</td>
+                    <td className="border px-2 flex gap-2">
+                      <button
+                        onClick={() => handleEdit(setEditingWord, w)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        onClick={() => deleteWord(w.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                      >
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {editingWord && (
+            <div ref={editRef} className="mt-4 p-4 border rounded bg-gray-100">
+              <h3 className="font-bold mb-2">✏️ แก้ไข Word</h3>
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingWord.word}
+                onChange={(e) =>
+                  setEditingWord({ ...editingWord, word: e.target.value })
+                }
+              />
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingWord.meaning}
+                onChange={(e) =>
+                  setEditingWord({ ...editingWord, meaning: e.target.value })
+                }
+              />
+              <button
+                onClick={updateWord}
+                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+              >
+                บันทึก
+              </button>
+              <button
+                onClick={() => setEditingWord(null)}
+                className="bg-gray-400 text-white px-4 py-2 rounded"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* ตาราง Words */}
-      <h2 className="text-lg font-bold mt-6">📖 Words</h2>
-      <table className="border-collapse border w-full mb-6">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border px-3 py-2">Word</th>
-            <th className="border px-3 py-2">Meaning</th>
-            <th className="border px-3 py-2">Language</th>
-            <th className="border px-3 py-2">Difficulty</th>
-            <th className="border px-3 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {words.map((w) => (
-            <tr key={w.id}>
-              <td className="border px-3 py-2">{w.word}</td>
-              <td className="border px-3 py-2">{w.meaning}</td>
-              <td className="border px-3 py-2">{w.language}</td>
-              <td className="border px-3 py-2">{w.difficulty}</td>
-              <td className="border px-3 py-2">
-                <button
-                  onClick={() => deleteWord(w.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                >
-                  ลบ
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* === Enemies === */}
+      {tab === "enemies" && (
+        <div>
+          <input
+            type="text"
+            placeholder="ค้นหา Enemy..."
+            value={enemyFilter}
+            onChange={(e) => setEnemyFilter(e.target.value)}
+            className="border p-2 mb-4 w-full"
+          />
+          {/* Add */}
+          <div className="mb-4 p-4 border rounded bg-gray-100">
+            <h3 className="font-bold mb-2">➕ เพิ่ม Enemy</h3>
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Name"
+              value={newEnemy.name}
+              onChange={(e) =>
+                setNewEnemy({ ...newEnemy, name: e.target.value })
+              }
+            />
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Image URL"
+              value={newEnemy.image}
+              onChange={(e) =>
+                setNewEnemy({ ...newEnemy, image: e.target.value })
+              }
+            />
+            <input
+              className="border p-2 w-full mb-2"
+              type="number"
+              placeholder="Health"
+              value={newEnemy.health}
+              onChange={(e) =>
+                setNewEnemy({ ...newEnemy, health: e.target.value })
+              }
+            />
+            <button
+              onClick={addEnemy}
+              className="bg-purple-500 text-white px-4 py-2 rounded"
+            >
+              บันทึก
+            </button>
+          </div>
+          {/* Table */}
+          <table className="border w-full">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border px-2">Name</th>
+                <th className="border px-2">Image</th>
+                <th className="border px-2">Health</th>
+                <th className="border px-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enemies
+                .filter((e) =>
+                  e.name.toLowerCase().includes(enemyFilter.toLowerCase())
+                )
+                .map((e) => (
+                  <tr key={e.id}>
+                    <td className="border px-2">{e.name}</td>
+                    <td className="border px-2">
+                      <img
+                        src={e.image}
+                        alt={e.name}
+                        className="w-12 h-12 object-contain"
+                      />
+                    </td>
+                    <td className="border px-2">{e.health}</td>
+                    <td className="border px-2 flex gap-2">
+                      <button
+                        onClick={() => handleEdit(setEditingEnemy, e)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        onClick={() => deleteEnemy(e.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                      >
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {editingEnemy && (
+            <div ref={editRef} className="mt-4 p-4 border rounded bg-gray-100">
+              <h3 className="font-bold mb-2">✏️ แก้ไข Enemy</h3>
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingEnemy.name}
+                onChange={(e) =>
+                  setEditingEnemy({ ...editingEnemy, name: e.target.value })
+                }
+              />
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingEnemy.image}
+                onChange={(e) =>
+                  setEditingEnemy({ ...editingEnemy, image: e.target.value })
+                }
+              />
+              <input
+                className="border p-2 w-full mb-2"
+                type="number"
+                value={editingEnemy.health}
+                onChange={(e) =>
+                  setEditingEnemy({ ...editingEnemy, health: e.target.value })
+                }
+              />
+              <button
+                onClick={updateEnemy}
+                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+              >
+                บันทึก
+              </button>
+              <button
+                onClick={() => setEditingEnemy(null)}
+                className="bg-gray-400 text-white px-4 py-2 rounded"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* ตาราง Enemies */}
-      <h2 className="text-lg font-bold mt-6">👾 Enemies</h2>
-      <table className="border-collapse border w-full">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border px-3 py-2">Name</th>
-            <th className="border px-3 py-2">Image</th>
-            <th className="border px-3 py-2">Health</th>
-            <th className="border px-3 py-2">Difficulty</th>
-          </tr>
-        </thead>
-        <tbody>
-          {enemies.map((e) => (
-            <tr key={e.id}>
-              <td className="border px-3 py-2">{e.name}</td>
-              <td className="border px-3 py-2"><img src={e.image} alt={e.name} className="w-16 h-16 object-contain" /></td>
-              <td className="border px-3 py-2">{e.health}</td>
-              <td className="border px-3 py-2">{e.difficulty}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* === Users === */}
+      {tab === "users" && (
+        <div>
+          <input
+            type="text"
+            placeholder="ค้นหา User..."
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="border p-2 mb-4 w-full"
+          />
+          {/* Add */}
+          <div className="mb-4 p-4 border rounded bg-gray-100">
+            <h3 className="font-bold mb-2">➕ เพิ่ม User</h3>
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Name"
+              value={newUser.displayName}
+              onChange={(e) =>
+                setNewUser({ ...newUser, displayName: e.target.value })
+              }
+            />
+            <input
+              className="border p-2 w-full mb-2"
+              placeholder="Email"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+            />
+            <button
+              onClick={addUser}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              บันทึก
+            </button>
+          </div>
+          {/* Table */}
+          <table className="border w-full">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border px-2">Name</th>
+                <th className="border px-2">Email</th>
+                <th className="border px-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users
+                .filter(
+                  (u) =>
+                    (u.displayName || "")
+                      .toLowerCase()
+                      .includes(userFilter.toLowerCase()) ||
+                    (u.email || "")
+                      .toLowerCase()
+                      .includes(userFilter.toLowerCase())
+                )
+                .map((u) => (
+                  <tr key={u.id}>
+                    <td className="border px-2">{u.displayName}</td>
+                    <td className="border px-2">{u.email}</td>
+                    <td className="border px-2 flex gap-2">
+                      <button
+                        onClick={() => handleEdit(setEditingUser, u)}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        onClick={() => deleteUser(u.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                      >
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {editingUser && (
+            <div ref={editRef} className="mt-4 p-4 border rounded bg-gray-100">
+              <h3 className="font-bold mb-2">✏️ แก้ไข User</h3>
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingUser.displayName}
+                onChange={(e) =>
+                  setEditingUser({
+                    ...editingUser,
+                    displayName: e.target.value,
+                  })
+                }
+              />
+              <input
+                className="border p-2 w-full mb-2"
+                value={editingUser.email}
+                onChange={(e) =>
+                  setEditingUser({ ...editingUser, email: e.target.value })
+                }
+              />
+              <button
+                onClick={updateUser}
+                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+              >
+                บันทึก
+              </button>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="bg-gray-400 text-white px-4 py-2 rounded"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
     </div>
+    
   );
 }

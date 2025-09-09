@@ -8,6 +8,9 @@ export default function StartScreen() {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState("");
+  const openWordManager = () => {
+    window.open("/word-manager", "_blank");
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -125,6 +128,14 @@ export default function StartScreen() {
             Log in with Google
           </button>
         )}
+        <div className="flex gap-2">
+            <button
+              onClick={openWordManager}
+              className="px-4 py-2 bg-green-500 text-white rounded"
+            >
+              ระบบการจัดการ
+            </button>
+        </div>
       </div>
 
       {/* โลโก้ */}

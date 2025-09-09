@@ -383,10 +383,6 @@ useEffect(() => {
     }
   };
 
-  const openWordManager = () => {
-    window.open("/word-manager", "_blank");
-  };
-
   // ตัวจับเวลา
   useEffect(() => {
     let timer;
@@ -532,14 +528,7 @@ useEffect(() => {
         <source src={getMusicByDifficulty()} type="audio/mpeg" />
       </audio>
 
-      {/* ปุ่มมุมขวาบน <div className="flex gap-2">
-            <button
-              onClick={openWordManager}
-              className="px-4 py-2 bg-green-500 text-white rounded"
-            >
-              จัดการคำศัพท์
-            </button>
-      </div>*/}
+      {/* ปุ่มมุมขวาบน */}
       
       <div className="fixed top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3 z-50">
         
