@@ -6,16 +6,34 @@ import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 export default function StartScreen() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(""); // ✅ state เก็บ role
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState("");
+
+  // ✅ ย้ายฟังก์ชันเข้ามาข้างใน component
   const openWordManager = () => {
-    window.open("/word-manager", "_blank");
+    if (!user) {
+      alert("กรุณาล็อกอินก่อนเข้าระบบจัดการ");
+      return;
+    }
+    // ใช้ navigate เพื่อไปหน้า word-manager
+    navigate("/word-manager");
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       setUser(currentUser);
-      if (currentUser) saveUserToFirestore(currentUser);
+      if (currentUser) {
+        await saveUserToFirestore(currentUser);
+        // ✅ โหลด role จาก Firestore
+        const userRef = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          setRole(snap.data().role || ""); // ถ้าไม่มี role จะเป็น ""
+        }
+      } else {
+        setRole("");
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -31,6 +49,7 @@ export default function StartScreen() {
         email: user.email,
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
+        role: "user", // ✅ ค่า default คือ user
         progress: {
           stage1: { highScore: 0, wpm: 0 },
           stage2: { highScore: 0, wpm: 0 },
@@ -128,14 +147,18 @@ export default function StartScreen() {
             Log in with Google
           </button>
         )}
-        <div className="flex gap-2">
+
+        {/* ✅ ปุ่มนี้จะแสดงเฉพาะ admin */}
+        {role === "admin" && (
+          <div className="flex gap-2">
             <button
               onClick={openWordManager}
               className="px-4 py-2 bg-green-500 text-white rounded"
             >
               ระบบการจัดการ
             </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* โลโก้ */}
