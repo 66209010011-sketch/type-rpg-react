@@ -366,14 +366,14 @@ useEffect(() => {
         setDamageText(damage);
         setTimeout(() => setDamageText(null), 800);
         setTimeout(() => setEnemyShake(false), 400);
-        playSound("/sound/enemyhit.mp3");
+        playSound("/sound/enemyhit.mp3" , 0.4);
       } else {
         setPlayerHP((prev) => Math.max(prev - 5, 0));
         setplayerShake(true);
         setPlayerHit(true);
         setTimeout(() => setPlayerHit(false), 300);
         setTimeout(() => setplayerShake(false), 400);
-        playSound("/sound/playerhit.wav");
+        playSound("/sound/playerhit.wav", 0.4);
       }
 
       setTypedIndexes([]);
