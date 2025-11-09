@@ -343,7 +343,7 @@ useEffect(() => {
           playSound("/sound/correct.wav", 0.10);
         }
         if (status === "incorrect") {
-          playSound("/sound/incorrect.mp3");
+          playSound("/sound/incorrect.wav");
         }
       }
     }
