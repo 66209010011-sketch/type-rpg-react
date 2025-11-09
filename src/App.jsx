@@ -343,7 +343,7 @@ useEffect(() => {
           playSound("/sound/correct.wav", 0.10);
         }
         if (status === "incorrect") {
-          playSound("/sound/incorrect.wav");
+          playSound("/sound/incorrect.mp3");
         }
       }
     }
@@ -412,7 +412,7 @@ useEffect(() => {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.load();
-      audioRef.current.volume = 0.05;
+      audioRef.current.volume = 0.15;
       audioRef.current.play().catch(() => {});
     }
   }, [difficulty]);
