@@ -72,28 +72,47 @@ useEffect(() => {
   };
 
   const importWordsFromJSON = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const text = await file.text();
-    try {
-      const data = JSON.parse(text);
-      if (!Array.isArray(data)) return alert("ไฟล์ JSON ต้องเป็น Array");
+  const file = e.target.files[0];
+  if (!file) return;
 
-      for (let item of data) {
-        if (item.word) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (!Array.isArray(data)) {
+      alert("❌ ไฟล์ JSON ต้องเป็น Array ของ Object");
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // ✅ ใช้ for...of เพื่อให้รอ addDoc แต่ละตัวเสร็จจริง
+    for (const item of data) {
+      if (item.word && typeof item.word === "string") {
+        try {
           await addDoc(collection(db, "words"), {
-            word: item.word,
-            meaning: item.meaning,
+            word: item.word.trim(),
+            meaning: item.meaning || "",
             language: item.language || "TH",
             difficulty: Number(item.difficulty) || 1,
           });
+          successCount++;
+        } catch (err) {
+          console.error("❌ เพิ่มคำไม่สำเร็จ:", item.word, err);
+          failCount++;
         }
       }
-      alert("นำเข้าไฟล์ JSON สำเร็จ");
-    } catch (err) {
-      alert("ไฟล์ JSON ไม่ถูกต้อง");
     }
-  };
+
+    alert(
+      `✅ เพิ่มคำสำเร็จ ${successCount} รายการ\n❌ เพิ่มไม่สำเร็จ ${failCount} รายการ`
+    );
+  } catch (err) {
+    console.error("❌ ข้อผิดพลาดในการอ่านไฟล์:", err);
+    alert("❌ ไฟล์ JSON ไม่ถูกต้อง หรืออ่านไม่ได้");
+  }
+};
 
   // subscribe realtime
   useEffect(() => {
