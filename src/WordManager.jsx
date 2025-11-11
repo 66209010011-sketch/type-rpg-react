@@ -80,7 +80,7 @@ useEffect(() => {
       if (!Array.isArray(data)) return alert("ไฟล์ JSON ต้องเป็น Array");
 
       for (let item of data) {
-        if (item.word && item.meaning) {
+        if (item.word) {
           await addDoc(collection(db, "words"), {
             word: item.word,
             meaning: item.meaning,
