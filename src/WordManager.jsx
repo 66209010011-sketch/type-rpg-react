@@ -235,6 +235,14 @@ useEffect(() => {
       {/* === Words === */}
       {tab === "words" && (
         <div>
+          {/* ✅ Added: แสดงจำนวนคำทั้งหมด */}
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold">
+              🧮 จำนวนคำทั้งหมด:{" "}
+              <span className="text-blue-600 font-bold">{words.length}</span> คำ
+            </h2>
+          </div>
+
           <input
             type="text"
             placeholder="ค้นหา Word..."
