@@ -6,7 +6,7 @@ import { getFirestore } from "firebase/firestore";
 
 // Config จาก Firebase Console
 const firebaseConfig = {
-  apiKey: "AIzaSyBMO2qN3SdY6yNYSirUnNJU5OfhhB3VZuE",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "words-81f1f.firebaseapp.com",
   databaseURL: "https://words-81f1f-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "words-81f1f",
